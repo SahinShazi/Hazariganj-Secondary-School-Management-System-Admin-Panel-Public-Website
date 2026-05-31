@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>হাজারীগঞ্জ মাধ্যমিক বিদ্যালয়</title>
+<meta name="description" content="হাজারীগঞ্জ মাধ্যমিক বিদ্যালয়ের অফিসিয়াল ওয়েবসাইট।" />
+<!-- ফেভিকন -->
+<link rel="icon" href="https://i.postimg.cc/CLCTjCdH/graduation-cap.png" type="image/png" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Noto+Serif+Bengali:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- ফায়ারবেস এসডিকে -->
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        primary: { DEFAULT: '#11224E', dark: '#0A1536', fg: '#ffffff' }, 
+        gold:    { DEFAULT: '#d4a437', fg: '#2b2008' },
+        card:    '#ffffff',
+        muted:   { DEFAULT: '#f4f5fa', fg: '#6b7184' },
+        border:  '#e3e6ef',
+        secondary: '#eef0f8',
+        gov:     '#006a4e'
+      },
+      fontFamily: {
+        sans:  ['"Hind Siliguri"','system-ui','sans-serif'],
+        serif: ['"Noto Serif Bengali"','serif']
+      },
+      boxShadow: {
+        card:    '0 4px 15px rgba(17,34,78,0.08)',
+        elegant: '0 15px 35px rgba(17,34,78,0.15)',
+        hover:   '0 20px 40px rgba(17,34,78,0.20)'
+      }
+    }
+  }
+};
+</script>
+<style>
+  html,body{font-family:'Hind Siliguri',system-ui,sans-serif;background:#fafbff;color:#172046; scroll-behavior: smooth;}
+  h1,h2,h3,h4{font-family:'Noto Serif Bengali',serif;font-weight:700}
+  .fade-in{animation:fade .5s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:none}}
+  .hero-slide{position:absolute;inset:0;opacity:0;transition:opacity 1.2s ease-in-out; visibility: hidden;}
+  .hero-slide.on{opacity:1; visibility: visible;}
+  
+  /* Custom scrollbar */
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: #f1f1f1; }
+  ::-webkit-scrollbar-thumb { background: #11224E; border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: #d4a437; }
+
+  /* ইমেজ ডাউনলোড প্রোটেকশন CSS */
+  img {
+    -webkit-user-drag: none;
+    -khtml-user-drag: none;
+    -moz-user-drag: none;
+    -o-user-drag: none;
+    user-drag: none;
+    -webkit-touch-callout: none; /* iOS এ লং প্রেস মেনু বন্ধ */
+  }
+</style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+<!-- TOP BAR (সরকারি স্টাইল ও ফায়ারবেস কন্ট্রোলড) -->
+<div class="bg-primary-dark text-white text-xs sm:text-sm py-1.5 border-b border-white/20 z-50 relative">
+  <div class="mx-auto max-w-7xl px-4 flex flex-col sm:flex-row justify-between items-center gap-1 sm:gap-4">
+    <div class="flex items-center gap-2">
+      <span class="text-gold font-bold">আপডেট:</span> 
+      <marquee class="max-w-[250px] sm:max-w-md font-medium tracking-wide" scrollamount="4" id="topBarText">
+        লোড হচ্ছে...
+      </marquee>
+    </div>
+    <div class="flex gap-4 font-semibold text-[13px]">
+      <a href="#/application" class="hover:text-gold transition-colors">অনলাইন আবেদন</a>
+      <span class="opacity-30">|</span>
+      <a href="#/complaint" class="hover:text-gold transition-colors">অভিযোগ বক্স</a>
+      <span class="opacity-30">|</span>
+<a href="https://hazariganjschooladmin.blogspot.com"
+   target="_blank"
+   rel="noopener noreferrer"
+   class="hover:text-gold transition-colors">
+   অ্যাডমিন লগইন
+</a>
+    </div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header class="sticky top-0 z-40 bg-primary text-primary-fg shadow-lg border-b-4 border-gold">
+  <div class="mx-auto max-w-7xl px-4">
+    <div class="flex items-center justify-between py-2.5">
+      <a href="#/" class="flex items-center gap-3 group">
+        <div class="bg-white p-1 rounded-full shadow-md group-hover:scale-105 transition-transform">
+          <img src="https://i.postimg.cc/CLCTjCdH/graduation-cap.png" alt="Logo" class="h-10 w-10 md:h-12 md:w-12 object-contain">
+        </div>
+        <div class="leading-tight">
+          <div class="font-serif text-lg md:text-xl font-bold group-hover:text-gold transition-colors" id="mainSchoolName">হাজারীগঞ্জ মাধ্যমিক বিদ্যালয়</div>
+          <div class="text-[11px] md:text-xs opacity-90 font-medium" id="headerSubtitle">স্থাপিত: ১৯৭২ | ইআইআইএন: ১০২২৩৪</div>
+        </div>
+      </a>
+      <button id="menuBtn" class="lg:hidden p-2 rounded-md hover:bg-white/10" aria-label="মেনু">
+        <svg id="menuIcon" class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+      <nav id="navDesktop" class="hidden lg:flex items-center gap-1"></nav>
+    </div>
+    <!-- মোবাইল মেনু (Vertical Stacked) -->
+    <nav id="navMobile" class="lg:hidden hidden flex-col gap-2 pb-4 pt-2 border-t border-white/10"></nav>
+  </div>
+</header>
+
+<main id="app" class="flex-grow"></main>
+
+<!-- FOOTER -->
+<footer class="bg-primary-dark text-white mt-auto border-t-[6px] border-gold">
+  <div class="mx-auto max-w-7xl px-4 py-12 grid gap-10 md:grid-cols-4">
+    <div>
+      <div class="flex items-center gap-3 mb-4">
+        <img src="https://i.postimg.cc/CLCTjCdH/graduation-cap.png" alt="Logo" class="h-10 w-10 bg-white rounded-full p-1">
+        <h3 class="text-xl font-bold text-gold" id="footerSchoolName">হাজারীগঞ্জ মাধ্যমিক বিদ্যালয়</h3>
+      </div>
+      <p class="text-sm opacity-80 leading-relaxed" id="footerSlogan">শিক্ষা, নৈতিকতা ও মানবিকতার আলোকে আলোকিত প্রজন্ম গড়ে তোলাই আমাদের লক্ষ্য।</p>
+    </div>
+    <div>
+      <h4 class="font-bold text-lg mb-4 border-b border-white/20 pb-2 inline-block">জরুরি লিংক</h4>
+      <ul class="space-y-2 text-sm opacity-90 font-medium">
+        <li><a href="#/about" class="hover:text-gold flex items-center gap-2"><span class="text-gold">▪</span> বিদ্যালয় পরিচিতি</a></li>
+        <li><a href="#/application" class="hover:text-gold flex items-center gap-2"><span class="text-gold">▪</span> অনলাইন আবেদন</a></li>
+        <li><a href="#/complaint" class="hover:text-gold flex items-center gap-2"><span class="text-gold">▪</span> অভিযোগ বক্স</a></li>
+        <li><a href="#/gallery" class="hover:text-gold flex items-center gap-2"><span class="text-gold">▪</span> গ্যালারি</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4 class="font-bold text-lg mb-4 border-b border-white/20 pb-2 inline-block">যোগাযোগ</h4>
+      <ul class="space-y-3 text-sm opacity-90" id="footerContactInfo">
+        <li class="flex items-start gap-2"><span class="mt-0.5">📍</span> <span>হাজারীগঞ্জ, বাংলাদেশ</span></li>
+        <li class="flex items-center gap-2"><span>📞</span> <span>ফোন: +৮৮০ ১৭০০-০০০০০০</span></li>
+        <li class="flex items-center gap-2"><span>✉️</span> <span>ইমেইল: info@hazariganj.edu.bd</span></li>
+      </ul>
+    </div>
+    <div>
+      <h4 class="font-bold text-lg mb-4 border-b border-white/20 pb-2 inline-block">গুরুত্বপূর্ণ সরকারি লিংক</h4>
+      <ul class="space-y-2 text-sm opacity-90">
+        <li><a href="https://moedu.gov.bd" target="_blank" class="hover:text-gold flex items-center gap-2"><span class="text-gold">▪</span> শিক্ষা মন্ত্রণালয়</a></li>
+        <li><a href="https://dshe.gov.bd" target="_blank" class="hover:text-gold flex items-center gap-2"><span class="text-gold">▪</span> মাউশি (DSHE)</a></li>
+        <li><a href="https://banbeis.gov.bd" target="_blank" class="hover:text-gold flex items-center gap-2"><span class="text-gold">▪</span> ব্যানবেইস</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="bg-black/50 py-4">
+    <div class="mx-auto max-w-7xl px-4 text-center text-sm opacity-90 flex flex-col md:flex-row justify-between items-center gap-3">
+      <div id="copyrightText">© <span id="yr"></span> হাজারীগঞ্জ মাধ্যমিক বিদ্যালয়। সর্বস্বত্ব সংরক্ষিত।</div>
+      <div class="text-xs font-bold tracking-wide bg-primary px-4 py-2 rounded-full border border-white/10 hover:border-gold transition-colors">
+        <a href="https://sahinenam.blogspot.com" target="_blank" rel="noopener noreferrer" class="hover:text-gold transition-colors">কারিগরি সহযোগিতায়: বিদ্যালয় আইটি টিম শাহিন</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ============ FIREBASE CONFIGURATION ============ */
+const firebaseConfig = {
+  apiKey: "AIzaSyD9..._example_key...gL1qQ",
+  authDomain: "my-project-id.firebaseapp.com",
+  projectId: "my-project-id",
+  storageBucket: "my-project-id.appspot.com",
+  messagingSenderId: "123456789012",
+  appId: "1:1234567890:web:abcd1234ef5678",
+  measurementId: "G-XXXXXXXXXX" // Optional: Used for Google Analytics
+};
+
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+
+/* ============ STATE & UTILS ============ */
+let DB = null; 
+
+function toBn(n){const m={0:'০',1:'১',2:'২',3:'৩',4:'৪',5:'৫',6:'৬',7:'৭',8:'৮',9:'৯'};return String(n).replace(/\d/g,d=>m[d]);}
+function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+
+document.getElementById('yr').textContent = toBn(new Date().getFullYear());
+
+const navItems = [
+  ['/', 'হোম'], ['/about', 'আমাদের সম্পর্কে'], ['/teachers', 'শিক্ষকবৃন্দ'], ['/students', 'শিক্ষার্থী'],
+  ['/notices', 'নোটিশ'], ['/holidays', 'ছুটি'], ['/gallery', 'গ্যালারি'],
+  ['/application', 'আবেদন করুন'], ['/contact', 'যোগাযোগ']
+];
+
+const navDesktop = document.getElementById('navDesktop');
+const navMobile = document.getElementById('navMobile');
+navItems.slice(0,8).forEach(([to,label])=>{
+  navDesktop.insertAdjacentHTML('beforeend', `<a href="#${to}" data-nav="${to}" class="nav-link rounded-md px-3 py-1.5 text-[15px] font-semibold hover:bg-white/10 hover:text-gold transition-colors">${label}</a>`);
+});
+navItems.forEach(([to,label])=>{
+  // মোবাইল মেনু আইটেম স্টাইল
+  navMobile.insertAdjacentHTML('beforeend', `<a href="#${to}" data-nav-mobile="${to}" class="nav-link-mobile block rounded-md px-4 py-2.5 text-[15px] font-semibold hover:bg-white/10 hover:text-gold transition-colors border-b border-white/5 last:border-0">${label}</a>`);
+});
+
+document.getElementById('menuBtn').onclick = () => {
+  navMobile.classList.toggle('hidden');
+  navMobile.classList.toggle('flex'); // Changed to flex for vertical layout
+};
+
+/* ============ FIREBASE SYNC ============ */
+function syncAndRender() {
+  database.ref('hgs_school_data').on('value', (snapshot) => {
+    DB = snapshot.val();
+    if (DB) {
+      updateStaticParts();
+      render();
+    }
+  });
+}
+
+function updateStaticParts() {
+  // Ensure default values if DB is empty
+  DB.settings.eiin = DB.settings.eiin || '102234';
+  DB.settings.schoolCode = DB.settings.schoolCode || '1234';
+  DB.settings.shift = DB.settings.shift || 'দিবা';
+  DB.settings.topBar = DB.settings.topBar || 'বিদ্যালয়ে স্বাগতম! নিয়মিত ক্লাস ও পরীক্ষায় অংশগ্রহণ নিশ্চিত করুন।';
+
+  document.getElementById('topBarText').innerText = DB.settings.topBar;
+  document.getElementById('mainSchoolName').innerText = DB.settings.name;
+  document.getElementById('headerSubtitle').innerText = `স্থাপিত: ${toBn(DB.settings.founded)} | ইআইআইএন: ${toBn(DB.settings.eiin)}`;
+  
+  document.getElementById('footerSchoolName').innerText = DB.settings.name;
+  document.getElementById('footerSlogan').innerText = DB.settings.slogan;
+  document.getElementById('copyrightText').innerHTML = `© <span id="yr">${toBn(new Date().getFullYear())}</span> ${esc(DB.settings.footer)}`;
+  document.getElementById('footerContactInfo').innerHTML = `
+    <li class="flex items-start gap-2"><span class="mt-0.5">📍</span> <span>${esc(DB.contact.address)}</span></li>
+    <li class="flex items-center gap-2"><span>📞</span> <span>ফোন: ${esc(DB.contact.phone)}</span></li>
+    <li class="flex items-center gap-2"><span>✉️</span> <span>ইমেইল: ${esc(DB.contact.email)}</span></li>
+  `;
+}
+
+function pageHero(title, subtitle){
+  return `<section class="bg-primary text-white py-12 md:py-16 relative overflow-hidden border-b-[6px] border-gold">
+    <div class="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+    <div class="mx-auto max-w-7xl px-4 text-center relative z-10">
+      <h1 class="font-serif text-3xl md:text-4xl font-bold mb-3">${title}</h1>
+      ${subtitle?`<p class="opacity-90 max-w-2xl mx-auto text-base md:text-lg">${subtitle}</p>`:''}
+      <div class="mx-auto mt-5 h-1 w-20 bg-gold rounded-full"></div>
+    </div></section>`;
+}
+function container(inner){ return `<section class="mx-auto max-w-7xl px-4 py-12 md:py-16">${inner}</section>`; }
+
+const Routes = {};
+
+/* ============ HOMEPAGE ============ */
+Routes['/'] = () => {
+  if(!DB) return `<div class="p-32 text-center text-primary font-bold text-xl animate-pulse">লোড হচ্ছে...</div>`;
+
+  // 1. Text & Logo section ABOVE slider
+  const heroHeader = `
+    <div class="bg-primary text-white text-center py-10 px-4 border-b-[4px] border-gold relative overflow-hidden">
+       <div class="absolute inset-0 opacity-5 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+       <div class="relative z-10">
+         <img src="https://i.postimg.cc/CLCTjCdH/graduation-cap.png" alt="Logo" class="h-16 md:h-20 mx-auto drop-shadow-md mb-4 bg-white p-2 rounded-full ring-4 ring-gold/30">
+         <h1 class="font-serif text-3xl md:text-4xl font-bold mb-3">${esc(DB.settings.name)}</h1>
+         <p class="text-white/90 text-base md:text-lg font-medium max-w-2xl mx-auto">${esc(DB.settings.slogan)}</p>
+       </div>
+    </div>
+  `;
+
+  // 2. Pure Slider (No text overlay)
+  const slides = DB.homepage.sliders.map((img,i)=>`
+    <div class="hero-slide ${i===0?'on':''}" data-slide="${i}">
+      <img src="${img}" alt="School Photo" class="h-full w-full object-cover">
+    </div>`).join('');
+
+  const sliderSection = `
+    <section class="bg-secondary/30 py-6 md:py-10">
+      <div class="mx-auto max-w-[1200px] px-3 sm:px-4">
+        <div class="relative h-[30vh] md:h-[55vh] min-h-[220px] max-h-[500px] overflow-hidden rounded-2xl md:rounded-3xl shadow-elegant border-[4px] border-white" id="hero">
+          ${slides}
+          <button id="prev" class="absolute left-3 top-1/2 -translate-y-1/2 z-20 rounded-full bg-black/40 backdrop-blur-sm h-8 w-8 md:h-10 md:w-10 flex items-center justify-center text-white hover:bg-gold transition-colors shadow-md">‹</button>
+          <button id="next" class="absolute right-3 top-1/2 -translate-y-1/2 z-20 rounded-full bg-black/40 backdrop-blur-sm h-8 w-8 md:h-10 md:w-10 flex items-center justify-center text-white hover:bg-gold transition-colors shadow-md">›</button>
+          <div class="absolute bottom-3 left-0 right-0 z-20 flex justify-center gap-2" id="sliderDots">
+            ${DB.homepage.sliders.map((_, i) => `<div class="dot h-2 rounded-full ${i===0?'w-8 bg-gold':'w-2 bg-white/70'} shadow"></div>`).join('')}
+          </div>
+        </div>
+      </div>
+    </section>
+  `;
+
+  // 3. Official Info Box (Responsive, single row)
+  const officialInfoBox = `
+    <div class="mx-auto max-w-4xl px-3 -mt-10 md:-mt-16 relative z-30 mb-12">
+       <div class="bg-white rounded-xl shadow-elegant p-3 md:p-5 border border-border grid grid-cols-4 items-center text-center gap-1 text-[11px] md:text-base font-bold text-primary divide-x divide-border">
+          <div class="px-1 md:px-4">EIIN <br><span class="text-gold text-sm md:text-xl font-sans">${toBn(DB.settings.eiin)}</span></div>
+          <div class="px-1 md:px-4 whitespace-nowrap">স্কুল কোড <br><span class="text-gold text-sm md:text-xl font-sans">${toBn(DB.settings.schoolCode)}</span></div>
+          <div class="px-1 md:px-4">প্রতিষ্ঠা <br><span class="text-gold text-sm md:text-xl font-sans">${toBn(DB.settings.founded)}</span></div>
+          <div class="px-1 md:px-4">শিফট <br><span class="text-gold text-sm md:text-xl font-sans">${esc(DB.settings.shift)}</span></div>
+       </div>
+    </div>
+  `;
+
+  // 4. Statistics (Fixed NaN for founded year)
+  const totalStu = DB.students.reduce((a,c)=>a+c.boys+c.girls,0);
+  const statsSection = `
+    <section class="bg-white py-10">
+      <div class="mx-auto max-w-7xl px-4 grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+        ${[
+          {num: totalStu, label: 'মোট শিক্ষার্থী', icon: '👨‍🎓'},
+          {num: DB.teachers.length, label: 'মোট শিক্ষক', icon: '👨‍🏫'},
+          {num: DB.settings.founded, label: 'প্রতিষ্ঠার সাল', icon: '🏛️', noAnim: true}, // প্রতিষ্ঠাকাল স্ট্যাটিক থাকবে
+          {num: DB.students.length, label: 'শ্রেণি সংখ্যা', icon: '📚'}
+        ].map(s => `
+          <div class="text-center bg-secondary/20 p-6 rounded-2xl shadow-sm border border-border/50 hover:shadow-md transition-all duration-300">
+            <div class="text-3xl mb-3">${s.icon}</div>
+            <div class="font-serif text-3xl md:text-4xl font-bold text-primary mb-1 ${s.noAnim ? '' : 'counter-value'}" ${s.noAnim ? '' : `data-target="${s.num}"`}>${s.noAnim ? toBn(s.num) : '০'}</div>
+            <div class="text-sm font-bold text-muted-fg">${s.label}</div>
+          </div>
+        `).join('')}
+      </div>
+    </section>
+  `;
+
+  // 5. Chairman & Head Teacher Message
+  const messagesSection = `
+    <section class="mx-auto max-w-7xl px-4 py-16 grid md:grid-cols-2 gap-8">
+      ${msgCardGovt(DB.chairman.photo, DB.chairman.name, DB.chairman.role, '/chairman', DB.chairman.message)}
+      ${msgCardGovt(DB.headTeacher.photo, DB.headTeacher.name, DB.headTeacher.role, '/head-teacher', DB.headTeacher.message)}
+    </section>
+  `;
+
+  // 6. Latest Notice (With Empty State)
+  const publishedNotices = DB.notices ? DB.notices.filter(n=>n.status==='published') : [];
+  const noticesListHtml = publishedNotices.length > 0 
+    ? `<ul class="divide-y divide-border">
+        ${publishedNotices.slice(0,5).map(n=>`
+          <li class="py-3 px-4 flex gap-4 items-center hover:bg-secondary/50 transition-colors group">
+            <div class="bg-primary/5 text-primary text-center rounded px-3 py-1 border border-primary/20 shrink-0">
+              <div class="text-lg font-bold leading-none">${toBn(n.date.split('-')[2])}</div>
+              <div class="text-[10px] uppercase font-semibold">${n.date.split('-')[1]}</div>
+            </div>
+            <div class="flex-grow">
+              <a href="#/notices" class="text-base font-semibold text-primary group-hover:text-gold transition-colors block line-clamp-1">${esc(n.title)}</a>
+            </div>
+          </li>
+        `).join('')}
+      </ul>`
+    : `<div class="text-center p-10 text-muted-fg font-medium bg-secondary/10">বর্তমানে কোনো নতুন নোটিশ নেই।</div>`;
+
+  const noticesSection = `
+    <section class="bg-secondary/20 py-12">
+      <div class="mx-auto max-w-7xl px-4">
+        <div class="flex items-center justify-between border-b-2 border-primary pb-3 mb-6">
+           <h2 class="font-serif text-2xl font-bold text-primary flex items-center gap-2"><span>📢</span> নোটিশ বোর্ড</h2>
+           <a href="#/notices" class="text-sm font-bold bg-primary text-white px-4 py-1.5 rounded hover:bg-gold transition-colors shadow-sm">সকল নোটিশ</a>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm border border-border overflow-hidden">
+          ${noticesListHtml}
+        </div>
+      </div>
+    </section>
+  `;
+
+  // 7. School Facilities
+  const facilitiesSection = `
+    <section class="bg-white py-16">
+      <div class="mx-auto max-w-7xl px-4 text-center">
+         <h2 class="font-serif text-3xl font-bold text-primary mb-3">বিদ্যালয়ের সুবিধাসমূহ</h2>
+         <div class="mx-auto h-1 w-20 bg-gold rounded-full mb-10"></div>
+         <div class="grid grid-cols-2 md:grid-cols-5 gap-4 md:gap-6">
+            ${[
+              {n:'কম্পিউটার ল্যাব', i:'💻'}, {n:'বিজ্ঞান ল্যাব', i:'🔬'}, 
+              {n:'সমৃদ্ধ লাইব্রেরি', i:'📚'}, {n:'খেলার মাঠ', i:'⚽'}, 
+              {n:'মাল্টিমিডিয়া ক্লাস', i:'📽️'}
+            ].map(f=>`
+               <div class="bg-secondary/20 p-5 rounded-xl shadow-sm border border-border hover:shadow-md hover:-translate-y-1 transition-all group">
+                 <div class="text-4xl mb-3 group-hover:scale-110 transition-transform">${f.i}</div>
+                 <h3 class="font-bold text-primary text-sm">${f.n}</h3>
+               </div>
+            `).join('')}
+         </div>
+      </div>
+    </section>
+  `;
+
+  // 8. Gallery
+  const galleryImages = DB.albums ? DB.albums.flatMap(a => a.images || []).slice(0, 4) : [];
+  const gallerySection = galleryImages.length > 0 ? `
+    <section class="py-16 mx-auto max-w-7xl px-4 bg-secondary/10 rounded-3xl mb-10">
+      <div class="flex items-center justify-between border-b-2 border-primary pb-3 mb-6 px-4">
+         <h2 class="font-serif text-2xl font-bold text-primary">ফটো গ্যালারি</h2>
+         <a href="#/gallery" class="text-sm font-bold bg-primary text-white px-4 py-1.5 rounded hover:bg-gold transition-colors shadow-sm">সম্পূর্ণ গ্যালারি</a>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 px-4">
+        ${galleryImages.map(img => `
+          <a href="#/gallery" class="group relative aspect-[4/3] overflow-hidden rounded-lg shadow-sm border border-border block">
+            <img loading="lazy" src="${img}" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110">
+          </a>
+        `).join('')}
+      </div>
+    </section>
+  ` : '';
+
+  // 9. Holiday Notice (With Empty State)
+  const activeHolidays = DB.holidays ? DB.holidays.slice(0,3) : [];
+  const holidaysListHtml = activeHolidays.length > 0
+    ? activeHolidays.map(h=>`<div class="bg-white rounded-lg p-4 shadow-sm border-l-4 border-red-500 flex justify-between items-center">
+        <div class="font-bold text-primary">${esc(h.title)}</div>
+        <div class="text-xs font-bold bg-red-100 text-red-700 px-2 py-1 rounded whitespace-nowrap ml-3">${toBn(h.start)}</div>
+      </div>`).join('')
+    : `<div class="md:col-span-3 text-center p-6 text-red-800 font-medium bg-white rounded-lg border border-red-100 shadow-sm">নিকট ভবিষ্যতে কোনো ছুটির তালিকা নেই।</div>`;
+
+  const holidaysSection = `
+    <section class="bg-red-50/50 py-12">
+      <div class="mx-auto max-w-7xl px-4">
+        <h2 class="font-serif text-2xl font-bold text-primary border-b-2 border-red-500 pb-3 mb-6">আসন্ন ছুটির তালিকা</h2>
+        <div class="grid md:grid-cols-3 gap-4">
+          ${holidaysListHtml}
+        </div>
+      </div>
+    </section>
+  `;
+
+  // 10. Important Links
+  const linksSection = `
+    <section class="py-16 bg-white mx-auto max-w-7xl px-4 text-center">
+       <h2 class="font-serif text-2xl font-bold text-primary mb-3">গুরুত্বপূর্ণ সরকারি সংযোগ</h2>
+       <div class="mx-auto h-1 w-16 bg-gov rounded-full mb-8"></div>
+       <div class="flex flex-wrap justify-center gap-3 md:gap-4">
+          <a href="https://moedu.gov.bd" target="_blank" class="px-5 py-2.5 border-2 border-gov text-gov text-sm font-bold rounded hover:bg-gov hover:text-white transition-colors shadow-sm">শিক্ষা মন্ত্রণালয়</a>
+          <a href="https://dshe.gov.bd" target="_blank" class="px-5 py-2.5 border-2 border-gov text-gov text-sm font-bold rounded hover:bg-gov hover:text-white transition-colors shadow-sm">মাউশি (DSHE)</a>
+          <a href="https://banbeis.gov.bd" target="_blank" class="px-5 py-2.5 border-2 border-gov text-gov text-sm font-bold rounded hover:bg-gov hover:text-white transition-colors shadow-sm">BANBEIS</a>
+          <a href="http://nctb.gov.bd" target="_blank" class="px-5 py-2.5 border-2 border-gov text-gov text-sm font-bold rounded hover:bg-gov hover:text-white transition-colors shadow-sm">NCTB</a>
+          <a href="https://bangladesh.gov.bd" target="_blank" class="px-5 py-2.5 border-2 border-gov text-gov text-sm font-bold rounded hover:bg-gov hover:text-white transition-colors shadow-sm">জাতীয় তথ্য বাতায়ন</a>
+       </div>
+    </section>
+  `;
+
+  return heroHeader + sliderSection + officialInfoBox + statsSection + messagesSection + noticesSection + facilitiesSection + gallerySection + holidaysSection + linksSection;
+};
+
+// Govt style message card
+function msgCardGovt(photo,name,role,link,msg){
+  return `<div class="bg-white rounded-xl shadow-sm border border-border p-6 md:p-8 flex flex-col md:flex-row gap-6 relative group overflow-hidden">
+    <div class="w-2 bg-primary absolute left-0 top-0 bottom-0 group-hover:bg-gold transition-colors"></div>
+    <div class="shrink-0 text-center mx-auto md:mx-0">
+      <img src="${photo}" alt="${esc(name)}" class="h-32 w-32 object-cover border-4 border-secondary shadow-md mb-3 rounded-full md:rounded-none" onerror="this.src='https://via.placeholder.com/150'">
+    </div>
+    <div>
+      <h3 class="font-serif font-bold text-primary text-xl">${esc(name)}</h3>
+      <div class="text-sm font-bold text-gold mb-3">${esc(role)}</div>
+      <p class="text-sm text-muted-fg leading-relaxed text-justify line-clamp-4">"${esc(msg)}"</p>
+      <a href="#${link}" class="mt-4 inline-block text-sm font-bold text-primary bg-secondary px-4 py-1.5 rounded hover:bg-primary hover:text-white transition-colors border border-border">বিস্তারিত পড়ুন</a>
+    </div>
+  </div>`;
+}
+
+/* ============ OTHER ROUTES ============ */
+Routes['/about'] = () => pageHero('আমাদের সম্পর্কে','ঐতিহ্য ও উৎকর্ষতার প্রতীক') + container(`
+  <div class="grid md:grid-cols-2 gap-10 bg-white p-8 md:p-12 rounded-xl shadow-sm border border-border mb-12">
+    <div class="space-y-4">
+      <h2 class="font-serif text-2xl md:text-3xl text-primary font-bold">বিদ্যালয়ের ইতিহাস</h2>
+      <p class="text-muted-fg leading-relaxed text-justify">আমাদের বিদ্যালয়টি ${toBn(DB.settings.founded)} সাল থেকে এই অঞ্চলের শিক্ষা বিস্তারে অগ্রণী ভূমিকা পালন করে আসছে।</p>
+      <p class="text-muted-fg leading-relaxed text-justify">${esc(DB.settings.slogan)} - এই মূলমন্ত্রকে ধারণ করে আমরা এগিয়ে চলেছি।</p>
+    </div>
+    <div class="bg-secondary/50 p-6 rounded-lg border border-border">
+       <h2 class="font-serif text-xl text-primary font-bold mb-4 border-b border-border pb-2">প্রতিষ্ঠানের তথ্য</h2>
+       <div class="space-y-3 text-sm font-medium">
+          <div class="flex justify-between border-b border-white pb-2"><span>ইআইআইএন (EIIN)</span><span class="text-primary font-bold">${toBn(DB.settings.eiin)}</span></div>
+          <div class="flex justify-between border-b border-white pb-2"><span>বিদ্যালয় কোড</span><span class="text-primary font-bold">${toBn(DB.settings.schoolCode)}</span></div>
+          <div class="flex justify-between border-b border-white pb-2"><span>প্রতিষ্ঠাকাল</span><span class="text-primary font-bold">${toBn(DB.settings.founded)}</span></div>
+          <div class="flex justify-between border-b border-white pb-2"><span>শিফট</span><span class="text-primary font-bold">${esc(DB.settings.shift)}</span></div>
+       </div>
+    </div>
+  </div>
+  
+  <h2 class="font-serif text-2xl md:text-3xl text-primary font-bold text-center mb-8">বিদ্যালয়ের সুবিধাসমূহ</h2>
+  <div class="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 gap-4">
+    ${[
+      {n:'কম্পিউটার ল্যাব', i:'💻', d:'আধুনিক কম্পিউটার সমৃদ্ধ ল্যাব'}, 
+      {n:'বিজ্ঞান ল্যাব', i:'🔬', d:'হাতে কলমে ব্যবহারিক শিক্ষা'}, 
+      {n:'সমৃদ্ধ লাইব্রেরি', i:'📚', d:'সহস্রাধিক বইয়ের সমাহার'}, 
+      {n:'খেলার মাঠ', i:'⚽', d:'বিশাল ও নিরাপদ প্রাঙ্গণ'}, 
+      {n:'মাল্টিমিডিয়া ক্লাস', i:'📽️', d:'প্রজেক্টরের মাধ্যমে ডিজিটাল পাঠদান'}
+    ].map(f=>`
+       <div class="bg-white p-6 rounded-xl shadow-sm border border-border text-center">
+         <div class="text-4xl mb-3 bg-secondary inline-block p-3 rounded-full">${f.i}</div>
+         <h3 class="font-bold text-primary mb-1">${f.n}</h3>
+         <p class="text-xs text-muted-fg">${f.d}</p>
+       </div>
+    `).join('')}
+  </div>
+`);
+
+Routes['/application'] = () => pageHero('অনলাইন আবেদন','ছুটি, প্রশংসাপত্র বা অন্যান্য দরকারে আবেদন করুন') + container(`
+  <div class="mx-auto max-w-2xl" id="appFormWrap">
+    <form id="applicationForm" class="rounded-xl bg-white p-8 shadow-md border-t-4 border-primary space-y-5">
+      <div class="bg-secondary/50 p-4 rounded-lg text-sm text-primary font-semibold mb-4 border border-border">
+         সঠিক তথ্য দিয়ে নিচের ফর্মটি পূরণ করুন। আবেদন জমা হওয়ার পর অফিস থেকে আপনার সাথে যোগাযোগ করা হবে।
+      </div>
+      <div class="grid md:grid-cols-2 gap-4">
+        <div><label class="block text-sm font-bold text-primary mb-1">শিক্ষার্থীর নাম *</label><input name="name" required class="w-full rounded border border-border p-2.5 focus:border-primary outline-none"></div>
+        <div><label class="block text-sm font-bold text-primary mb-1">মোবাইল নম্বর *</label><input name="phone" required class="w-full rounded border border-border p-2.5 focus:border-primary outline-none"></div>
+      </div>
+      <div class="grid md:grid-cols-3 gap-4">
+        <div>
+           <label class="block text-sm font-bold text-primary mb-1">শ্রেণি *</label>
+           <select name="class" required class="w-full rounded border border-border p-2.5 focus:border-primary outline-none bg-white">
+             <option value="">নির্বাচন করুন</option><option value="6">৬ষ্ঠ</option><option value="7">৭ম</option><option value="8">৮ম</option><option value="9">৯ম</option><option value="10">১০ম</option>
+           </select>
+        </div>
+        <div><label class="block text-sm font-bold text-primary mb-1">রোল নম্বর *</label><input name="roll" required class="w-full rounded border border-border p-2.5 focus:border-primary outline-none"></div>
+        <div>
+           <label class="block text-sm font-bold text-primary mb-1">আবেদনের ধরন *</label>
+           <select name="type" required class="w-full rounded border border-border p-2.5 focus:border-primary outline-none bg-white">
+             <option value="">নির্বাচন করুন</option><option value="leave">ছুটির আবেদন</option><option value="testimonial">প্রশংসাপত্র</option><option value="tc">ছাড়পত্র (TC)</option><option value="book">বইয়ের আবেদন</option><option value="other">অন্যান্য</option>
+           </select>
+        </div>
+      </div>
+      <div><label class="block text-sm font-bold text-primary mb-1">আবেদনের বিবরণ (কারণ) *</label><textarea name="details" required rows="4" class="w-full rounded border border-border p-2.5 focus:border-primary outline-none"></textarea></div>
+      <button type="submit" class="w-full rounded bg-primary px-6 py-3 text-white font-bold text-lg hover:bg-gold transition-colors">আবেদন জমা দিন</button>
+    </form>
+  </div>`);
+
+Routes['/chairman'] = () => pageHero('সভাপতির বাণী','') + container(`<div class="bg-white p-8 rounded shadow-sm border border-border text-center md:text-left"><img src="${DB.chairman.photo}" class="float-none md:float-left mr-8 mb-4 h-48 w-48 object-cover border-4 border-secondary"><h2 class="font-serif text-2xl font-bold text-primary">${esc(DB.chairman.name)}</h2><div class="text-gold font-bold text-lg mb-4">${esc(DB.chairman.role)}</div><div class="text-muted-fg leading-relaxed text-justify space-y-4 text-lg"><p>${esc(DB.chairman.message)}</p></div><div class="clear-both"></div></div>`);
+Routes['/head-teacher'] = () => pageHero('প্রধান শিক্ষকের বাণী','') + container(`<div class="bg-white p-8 rounded shadow-sm border border-border text-center md:text-left"><img src="${DB.headTeacher.photo}" class="float-none md:float-left mr-8 mb-4 h-48 w-48 object-cover border-4 border-secondary"><h2 class="font-serif text-2xl font-bold text-primary">${esc(DB.headTeacher.name)}</h2><div class="text-gold font-bold text-lg mb-4">${esc(DB.headTeacher.role)}</div><div class="text-muted-fg leading-relaxed text-justify space-y-4 text-lg"><p>${esc(DB.headTeacher.message)}</p></div><div class="clear-both"></div></div>`);
+
+Routes['/teachers'] = () => pageHero('শিক্ষকবৃন্দ','') + container(`<div class="grid grid-cols-2 md:grid-cols-4 gap-6">${DB.teachers.map(t=>`<div class="bg-white rounded-lg border border-border overflow-hidden text-center hover:shadow-md transition-shadow"><img src="${t.photo}" class="w-full aspect-[4/5] object-cover bg-secondary"><div class="p-4"><h3 class="font-bold text-primary">${esc(t.name)}</h3><div class="text-xs font-bold text-gold mt-1">${esc(t.role)}</div><div class="text-xs text-muted-fg mt-1">${esc(t.subject)}</div></div></div>`).join('')}</div>`);
+
+Routes['/students'] = () => {
+  const tb = DB.students.reduce((a,c)=>a+c.boys,0);
+  const tg = DB.students.reduce((a,c)=>a+c.girls,0);
+  return pageHero('শিক্ষার্থী পরিসংখ্যান','') + container(`
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+      ${[['মোট শিক্ষার্থী',tb+tg],['ছাত্র',tb],['ছাত্রী',tg]].map(s=>`
+        <div class="bg-white border-l-4 border-primary p-6 shadow-sm"><div class="text-3xl font-bold text-primary">${toBn(s[1])}</div><div class="text-sm font-bold text-muted-fg">${s[0]}</div></div>`).join('')}
+    </div>
+    <div class="bg-white rounded border border-border overflow-hidden shadow-sm">
+      <table class="w-full text-left border-collapse"><thead class="bg-secondary text-primary border-b border-border"><tr><th class="p-4 font-bold">শ্রেণি</th><th class="p-4 text-center font-bold">ছাত্র</th><th class="p-4 text-center font-bold">ছাত্রী</th><th class="p-4 text-center font-bold">মোট</th></tr></thead><tbody class="divide-y divide-border">
+          ${DB.students.map(c=>`<tr class="hover:bg-secondary/30"><td class="p-4 font-bold text-primary">${esc(c.cls)}</td><td class="p-4 text-center">${toBn(c.boys)}</td><td class="p-4 text-center">${toBn(c.girls)}</td><td class="p-4 text-center font-bold text-primary">${toBn(c.boys+c.girls)}</td></tr>`).join('')}
+      </tbody></table></div>`);
+};
+
+Routes['/notices'] = () => {
+  const publishedNotices = DB.notices ? DB.notices.filter(n=>n.status==='published').slice().reverse() : [];
+  const content = publishedNotices.length > 0 
+    ? publishedNotices.map(n=>`<div class="bg-white p-6 rounded shadow-sm border border-border flex gap-4 hover:shadow-md transition-shadow"><div class="bg-primary/10 text-primary text-center rounded p-3 min-w-[80px] shrink-0 h-min border border-primary/20"><div class="text-2xl font-bold">${toBn(n.date.split('-')[2])}</div><div class="text-[11px] font-bold uppercase">${n.date.split('-')[1]}</div></div><div><h3 class="font-bold text-primary text-xl mb-2">${esc(n.title)}</h3><p class="text-sm text-muted-fg whitespace-pre-line leading-relaxed">${esc(n.body)}</p></div></div>`).join('') 
+    : '<div class="text-center p-12 bg-white rounded border border-border text-muted-fg text-lg font-medium shadow-sm">বর্তমানে কোনো নোটিশ নেই।</div>';
+  return pageHero('নোটিশ বোর্ড','') + container(`<div class="space-y-4 max-w-4xl mx-auto">${content}</div>`);
+};
+
+Routes['/holidays'] = () => {
+  const content = (DB.holidays && DB.holidays.length > 0)
+    ? `<div class="bg-white rounded border border-border shadow-sm max-w-4xl mx-auto overflow-hidden"><table class="w-full text-left"><thead class="bg-secondary text-primary border-b border-border"><tr><th class="p-4 font-bold">ছুটির বিবরণ</th><th class="p-4 font-bold text-right">তারিখ</th></tr></thead><tbody class="divide-y divide-border">${DB.holidays.map(h=>`<tr class="hover:bg-secondary/20"><td class="p-4 font-bold text-primary">${esc(h.title)}</td><td class="p-4 text-sm font-bold text-right bg-red-50 text-red-700 w-48">${toBn(h.start)} - ${toBn(h.end)}</td></tr>`).join('')}</tbody></table></div>`
+    : `<div class="text-center p-12 bg-white rounded border border-border text-muted-fg text-lg font-medium shadow-sm max-w-4xl mx-auto">নিকট ভবিষ্যতে কোনো ছুটির তালিকা নেই।</div>`;
+  return pageHero('ছুটির তালিকা','') + container(content);
+};
+
+Routes['/gallery'] = () => pageHero('ফটো গ্যালারি','') + container(`<div class="grid grid-cols-2 md:grid-cols-4 gap-4">${DB.albums.flatMap(a => (a.images || []).map(img => `<div class="aspect-square rounded border border-border overflow-hidden bg-white p-1 shadow-sm"><img loading="lazy" src="${img}" class="h-full w-full object-cover hover:scale-110 transition-transform rounded-sm"></div>`)).join('')}</div>`);
+
+Routes['/complaint'] = () => pageHero('অভিযোগ বক্স','') + container(`
+  <div class="mx-auto max-w-2xl" id="complaintWrap">
+    <div class="text-center mb-6">
+       <div class="inline-block bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-bold border border-primary/20">
+         🔒 আপনার তথ্য সম্পূর্ণ গোপন থাকবে।
+       </div>
+    </div>
+    <form id="complaintForm" class="rounded bg-white p-8 shadow-sm border border-border space-y-4">
+      <div><label class="block text-sm font-bold text-primary mb-1">নাম</label><input name="name" required class="w-full rounded border border-border p-2.5 focus:border-primary outline-none"></div>
+      <div><label class="block text-sm font-bold text-primary mb-1">মোাবাইল নম্বর</label><input name="phone" required class="w-full rounded border border-border p-2.5 focus:border-primary outline-none"></div>
+      <div><label class="block text-sm font-bold text-primary mb-1">বিষয়</label><input name="subject" required class="w-full rounded border border-border p-2.5 focus:border-primary outline-none"></div>
+      <div><label class="block text-sm font-bold text-primary mb-1">অভিযোগের বিবরণ</label><textarea name="body" required rows="5" class="w-full rounded border border-border p-2.5 focus:border-primary outline-none"></textarea></div>
+      <button type="submit" class="w-full bg-primary text-white font-bold py-3.5 rounded hover:bg-gold transition-colors text-lg">অভিযোগ জমা দিন</button>
+    </form>
+  </div>`);
+
+Routes['/contact'] = () => pageHero('যোগাযোগ','') + container(`
+  <div class="grid md:grid-cols-2 gap-8 items-start">
+    <div class="bg-white p-8 rounded border border-border space-y-6 shadow-sm">
+      <h3 class="text-2xl font-serif font-bold text-primary mb-4 border-b pb-3">আমাদের সাথে যোগাযোগ</h3>
+      <div class="space-y-4">
+        <div class="flex gap-4 items-start"><span class="text-xl">📍</span><div><strong class="block text-primary">ঠিকানা:</strong><span class="text-muted-fg">${esc(DB.contact.address)}</span></div></div>
+        <div class="flex gap-4 items-center"><span class="text-xl">📞</span><div><strong class="block text-primary">ফোন নম্বর:</strong><span class="text-muted-fg">${esc(DB.contact.phone)}</span></div></div>
+        <div class="flex gap-4 items-center"><span class="text-xl">✉️</span><div><strong class="block text-primary">ইমেইল:</strong><span class="text-muted-fg">${esc(DB.contact.email)}</span></div></div>
+      </div>
+    </div>
+    <div class="h-80 md:h-full rounded border-4 border-white shadow-md overflow-hidden bg-secondary">
+      <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3689.87!2d90.71!3d22.41!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjPCsDQ2JzQ4LjAiTiA5MMKwMjMnMjQuMCJF!5e0!3m2!1sen!2sbd!4v1700000000000" class="w-full h-full border-0"></iframe>
+    </div>
+  </div>`);
+
+
+// ROUTER & INIT
+let heroTimer=null;
+function render(){
+  if(heroTimer){clearInterval(heroTimer);heroTimer=null;}
+  const path = (location.hash||'#/').slice(1) || '/';
+
+  if (path === '/admin') {
+    window.open('admin.html', '_blank');
+    location.hash = '#/'; 
+    return;
+  }
+
+  const route = Routes[path] || Routes['/'];
+  const app = document.getElementById('app');
+  app.innerHTML = '<div class="fade-in">'+route()+'</div>';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  document.querySelectorAll('[data-nav]').forEach(a=>a.classList.toggle('text-gold', a.dataset.nav===path));
+  document.querySelectorAll('[data-nav-mobile]').forEach(a=>{
+    a.classList.toggle('bg-white/10', a.dataset.navMobile===path);
+    a.classList.toggle('text-gold', a.dataset.navMobile===path);
+  });
+  navMobile.classList.add('hidden'); navMobile.classList.remove('flex'); // Reset mobile menu on click
+
+  if(path==='/') {
+    initHero();
+    setTimeout(animateCounters, 100); 
+  }
+  if(path==='/complaint') initComplaintSubmit();
+  if(path==='/application') initApplicationSubmit();
+}
+
+// Slider Logic
+function initHero(){
+  const slides = document.querySelectorAll('.hero-slide');
+  const prevBtn = document.getElementById('prev');
+  const nextBtn = document.getElementById('next');
+  if(!slides.length) return;
+  
+  let cur = 0;
+  const show = (i) => {
+    cur = (i + slides.length) % slides.length;
+    slides.forEach((s,j)=>s.classList.toggle('on', j===cur));
+    const dots = document.querySelectorAll('.dot');
+    if(dots.length) {
+      dots.forEach((d,j)=> d.className = 'dot h-2 rounded-full transition-all duration-300 '+(j===cur?'w-8 bg-gold':'w-2 bg-white/70 shadow'));
+    }
+  };
+
+  if(prevBtn) prevBtn.onclick = () => { show(cur-1); resetTimer(); };
+  if(nextBtn) nextBtn.onclick = () => { show(cur+1); resetTimer(); };
+
+  const startTimer = () => heroTimer = setInterval(()=>show(cur+1), 4000);
+  const resetTimer = () => { clearInterval(heroTimer); startTimer(); };
+  startTimer();
+}
+
+// Animated Counter Logic
+function animateCounters() {
+  const counters = document.querySelectorAll('.counter-value');
+  counters.forEach(counter => {
+    const targetStr = counter.getAttribute('data-target');
+    if(!targetStr) return;
+    const target = parseInt(targetStr);
+    if(isNaN(target) || target === 0) return;
+    
+    const duration = 2000; 
+    const step = Math.max(1, Math.ceil(target / (duration / 16)));
+    let current = 0;
+    
+    const updateCounter = () => {
+      current += step;
+      if (current < target) {
+        counter.innerText = toBn(current);
+        requestAnimationFrame(updateCounter);
+      } else {
+        counter.innerText = toBn(target);
+      }
+    };
+    updateCounter();
+  });
+}
+
+// Complaint form submit
+function initComplaintSubmit(){
+  const f = document.getElementById('complaintForm');
+  if(!f) return;
+  f.onsubmit = e => {
+    e.preventDefault();
+    const data = Object.fromEntries(new FormData(f));
+    const newComplaint = { ...data, id: Date.now(), date: new Date().toISOString().slice(0,10), status: 'pending' };
+    if(!DB.complaints) DB.complaints = [];
+    DB.complaints.push(newComplaint);
+    database.ref('hgs_school_data/complaints').set(DB.complaints).then(() => {
+      document.getElementById('complaintWrap').innerHTML = `<div class="rounded-xl bg-white p-12 text-center border border-border shadow-sm fade-in"><div class="text-5xl mb-4 text-green-500">✅</div><h2 class="font-bold text-2xl text-primary">ধন্যবাদ!</h2><p class="text-muted-fg mt-2 text-lg">আপনার অভিযোগ সফলভাবে জমা হয়েছে।</p></div>`;
+    });
+  };
+}
+
+// Application form submit
+function initApplicationSubmit(){
+  const f = document.getElementById('applicationForm');
+  if(!f) return;
+  f.onsubmit = e => {
+    e.preventDefault();
+    const data = Object.fromEntries(new FormData(f));
+    const newApp = { ...data, id: Date.now(), date: new Date().toISOString().slice(0,10), status: 'pending' };
+    
+    if(!DB.applications) DB.applications = [];
+    DB.applications.push(newApp);
+    
+    database.ref('hgs_school_data/applications').set(DB.applications).then(() => {
+      document.getElementById('appFormWrap').innerHTML = `<div class="rounded-xl bg-white p-12 text-center border border-border shadow-sm fade-in"><div class="text-6xl mb-4 text-green-600">✅</div><h2 class="font-serif font-bold text-3xl text-primary">আবেদন সফল!</h2><p class="text-muted-fg mt-3 text-lg">আপনার আবেদনটি কর্তৃপক্ষের কাছে পাঠানো হয়েছে। ধন্যবাদ।</p><button onclick="location.hash='#/'" class="mt-6 px-6 py-2 bg-primary text-white rounded font-bold hover:bg-gold transition-colors">হোমে ফিরে যান</button></div>`;
+    });
+  };
+}
+
+/* ============ IMAGE DOWNLOAD PROTECTION SCRIPT ============ */
+document.addEventListener('contextmenu', function(e) {
+  if (e.target.tagName === 'IMG') {
+    e.preventDefault();
+  }
+}, false);
+
+document.addEventListener('dragstart', function(e) {
+  if (e.target.tagName === 'IMG') {
+    e.preventDefault();
+  }
+}, false);
+
+window.addEventListener('hashchange', render);
+syncAndRender();
+</script>
+</body>
+</html>

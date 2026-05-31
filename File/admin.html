@@ -1,0 +1,856 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>অ্যাডমিন প্যানেল — হাজারীগঞ্জ মাধ্যমিক বিদ্যালয়</title>
+<!-- ফেভিকন -->
+<link rel="icon" href="https://i.postimg.cc/CLCTjCdH/graduation-cap.png" type="image/png" />
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Noto+Serif+Bengali:wght@600;700&display=swap" rel="stylesheet">
+
+<!-- ফায়ারবেস এসডিকে (Firebase SDK Compatibility Version) -->
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
+<style>
+  html,body{font-family:'Hind Siliguri',sans-serif;background:#f1f5f9; overflow-x: hidden;}
+  .serif{font-family:'Noto Serif Bengali',serif}
+  .nav-btn{display:flex;align-items:center;gap:.75rem;width:100%;padding:.7rem 1rem;border-radius:.5rem;color:#cbd5e1;font-size:.95rem;text-align:right;direction:rtl; transition: .2s;}
+  .nav-btn:hover{background:#1e293b;color:#fff}
+  .nav-btn.active{background:linear-gradient(90deg,#ca8a04,#eab308);color:#0f172a;font-weight:700}
+  .card{background:#fff;border-radius:.75rem;box-shadow:0 2px 10px rgba(0,0,0,.05);border:1px solid #e2e8f0}
+  .btn{padding:.5rem 1rem;border-radius:.5rem;font-weight:600;font-size:.9rem;transition:.2s;cursor:pointer; display: inline-flex; align-items: center; justify-content: center; gap: 0.25rem;}
+  .btn-primary{background:#0f172a;color:#fff}.btn-primary:hover{background:#1e293b}
+  .btn-gold{background:#ca8a04;color:#fff}.btn-gold:hover{background:#a16207}
+  .btn-danger{background:#dc2626;color:#fff}.btn-danger:hover{background:#b91c1c}
+  .btn-outline{border:1px solid #cbd5e1;background:#fff;color:#0f172a}.btn-outline:hover{background:#f8fafc}
+  .input,.textarea,.select{width:100%;padding:.6rem .75rem;border:1px solid #cbd5e1;border-radius:.5rem;font-size:.95rem;background:#fff;font-family:inherit;transition:.2s;}
+  .input:focus,.textarea:focus,.select:focus{outline:none;border-color:#ca8a04;box-shadow:0 0 0 3px rgba(202,138,4,.15)}
+  .label{display:block;font-size:.85rem;font-weight:700;color:#334155;margin-bottom:.35rem}
+  .badge{display:inline-block;padding:.2rem .75rem;border-radius:9999px;font-size:.75rem;font-weight:600}
+  table{width:100%;border-collapse:collapse; white-space: nowrap;}
+  th{background:#f8fafc;text-align:left;padding:.8rem;font-size:.85rem;font-weight:700;color:#475569;border-bottom:2px solid #e2e8f0}
+  td{padding:.8rem;border-bottom:1px solid #f1f5f9;font-size:.9rem; color:#334155;}
+  tr:hover td{background:#f8fafc}
+  .modal-bg{position:fixed;inset:0;background:rgba(15,23,42,.6);display:flex;align-items:center;justify-content:center;z-index:100;padding:1rem;backdrop-filter:blur(2px);}
+  .modal{background:#fff;border-radius:1rem;max-width:600px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 25px 50px -12px rgba(0,0,0,.25);}
+  .toast{position:fixed;top:1.5rem;right:1.5rem;background:#16a34a;color:#fff;padding:.75rem 1.25rem;border-radius:.5rem;z-index:200;box-shadow:0 10px 15px -3px rgba(0,0,0,.1);font-weight:600;animation:slideIn .3s ease}
+  @keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+  
+  /* Toggle Switch */
+  .switch{position:relative;display:inline-block;width:44px;height:24px}
+  .switch input{opacity:0;width:0;height:0}
+  .slider{position:absolute;cursor:pointer;inset:0;background:#cbd5e1;border-radius:24px;transition:.3s}
+  .slider:before{content:"";position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s}
+  input:checked + .slider{background:#16a34a}
+  input:checked + .slider:before{transform:translateX(20px)}
+
+  /* Responsive Table Wrapper */
+  .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+</style>
+</head>
+<body class="text-slate-800">
+
+<!-- লোডার স্ক্রিন -->
+<div id="appLoader" class="min-h-screen flex items-center justify-center bg-slate-100 fixed inset-0 z-[200]">
+  <div class="text-center">
+    <div class="w-14 h-14 border-4 border-yellow-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+    <p class="text-slate-700 serif text-lg font-bold">লগইন যাচাই হচ্ছে...</p>
+  </div>
+</div>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" class="hidden min-h-screen flex items-center justify-center p-4 relative" style="background:linear-gradient(135deg,#0f172a,#1e293b)">
+  <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+  <div class="card w-full max-w-md p-8 md:p-10 relative z-10 shadow-2xl border-0">
+    <div class="text-center mb-8">
+      <div class="w-20 h-20 mx-auto bg-white rounded-full flex items-center justify-center shadow-lg mb-4 p-2">
+        <img src="https://i.postimg.cc/CLCTjCdH/graduation-cap.png" alt="Logo" class="w-full h-full object-contain">
+      </div>
+      <h1 class="serif text-2xl font-bold text-slate-900">অ্যাডমিন প্যানেল</h1>
+      <p class="text-sm text-slate-500 mt-1 font-medium">হাজারীগঞ্জ মাধ্যমিক বিদ্যালয়</p>
+    </div>
+    <form id="loginForm" class="space-y-5">
+      <div><label class="label">ইমেইল অ্যাড্রেস</label><input id="loginEmail" type="email" class="input" placeholder="admin@hazariganj.edu.bd" required></div>
+      <div><label class="label">পাসওয়ার্ড</label><input id="loginPass" type="password" class="input" placeholder="••••••••" required></div>
+      <div id="loginErr" class="hidden text-sm font-bold text-red-600 bg-red-50 p-3 rounded border border-red-200"></div>
+      <button id="loginBtn" class="btn btn-gold w-full text-lg py-3">লগইন করুন</button>
+      <div class="text-xs text-slate-400 text-center bg-slate-50 p-3 rounded-lg border border-slate-100">
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- APP SHELL -->
+<div id="app" class="hidden min-h-screen flex relative">
+  <!-- Mobile Sidebar Overlay -->
+  <div id="sidebarOverlay" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 hidden lg:hidden transition-opacity" onclick="toggleSidebar()"></div>
+
+  <!-- Sidebar -->
+  <aside id="sidebar" class="bg-slate-900 text-white w-64 flex-shrink-0 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out z-50 overflow-y-auto shadow-2xl lg:shadow-none flex flex-col">
+    <div class="p-5 border-b border-slate-800 flex items-center gap-3">
+      <img src="https://i.postimg.cc/CLCTjCdH/graduation-cap.png" class="w-10 h-10 bg-white rounded-full p-1">
+      <div>
+        <h2 class="serif text-base font-bold text-yellow-400 leading-tight">অ্যাডমিন প্যানেল</h2>
+        <p class="text-[11px] text-slate-400 mt-0.5">হাজারীগঞ্জ মা. বিদ্যালয়</p>
+      </div>
+    </div>
+    <nav class="p-4 space-y-1.5 flex-grow" id="navMenu" dir="ltr"></nav>
+    <div class="p-4 border-t border-slate-800 bg-slate-900 sticky bottom-0">
+      <div class="flex items-center gap-3 mb-4 px-2">
+        <div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-yellow-500 font-bold border border-slate-700">A</div>
+        <div class="overflow-hidden">
+          <div class="text-sm font-bold truncate" id="userEmailLabel">admin@...</div>
+          <div class="text-xs text-green-400 font-medium">● অনলাইনে আছেন</div>
+        </div>
+      </div>
+      <button onclick="logout()" class="nav-btn w-full text-red-400 hover:bg-red-500 hover:text-white border border-red-900/50 justify-center">🚪 লগআউট</button>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <div class="flex-1 lg:ml-64 flex flex-col min-h-screen w-full">
+    <header class="bg-white border-b sticky top-0 z-30 px-4 lg:px-8 py-4 flex items-center justify-between shadow-sm">
+      <div class="flex items-center gap-4">
+        <button class="lg:hidden text-slate-600 hover:text-primary transition-colors p-1" onclick="toggleSidebar()">
+          <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
+        <h1 id="pageTitle" class="serif text-xl md:text-2xl font-bold text-primary">ড্যাশবোর্ড</h1>
+      </div>
+      <a href="https://hazariganjschool.blogspot.com" target="_blank" class="btn btn-outline text-xs md:text-sm hidden sm:flex">🌐 ওয়েবসাইট ভিজিট</a>
+    </header>
+    <main id="mainContent" class="p-4 lg:p-8 flex-grow overflow-x-hidden"></main>
+  </div>
+</div>
+
+<div id="modalRoot"></div>
+<div id="toastRoot"></div>
+
+<script>
+/* ============ FIREBASE CONFIGURATION ============ */
+const firebaseConfig = {
+  apiKey: "AIzaSyD9..._example_key...gL1qQ",
+  authDomain: "my-project-id.firebaseapp.com",
+  projectId: "my-project-id",
+  storageBucket: "my-project-id.appspot.com",
+  messagingSenderId: "123456789012",
+  appId: "1:1234567890:web:abcd1234ef5678",
+  measurementId: "G-XXXXXXXXXX" // Optional: Used for Google Analytics
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const database = firebase.database();
+
+/* ============ DEFAULT DATA ============ */
+const defaults={
+  settings:{name:'হাজারীগঞ্জ মাধ্যমিক বিদ্যালয়',slogan:'জ্ঞান, নৈতিকতা ও উৎকর্ষতার আলোকবর্তিকা',founded:'১৯৭২',footer:'© ২০২৬ হাজারীগঞ্জ মাধ্যমিক বিদ্যালয়। সর্বস্বত্ব সংরক্ষিত।', eiin:'১০২২৩৪', schoolCode:'১২৩৪', shift:'দিবা', topBar:'বিদ্যালয়ে স্বাগতম! নিয়মিত ক্লাস ও পরীক্ষায় অংশগ্রহণ নিশ্চিত করুন।'},
+  homepage:{sections:{hero:true,stats:true,notices:true,gallery:true,messages:true},sliders:[
+    'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=1600&q=80',
+    'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1600&q=80'
+  ]},
+  contact:{address:'হাজারীগঞ্জ, লক্ষ্মীপুর, বাংলাদেশ',phone:'+৮৮০ ১৭০০-০০০০০০',email:'info@hazariganjschool.edu.bd',map:'https://maps.google.com/?q=Hazariganj+Bangladesh'},
+  chairman:{photo:'https://randomuser.me/api/portraits/men/55.jpg',name:'মোঃ আবুল হোসেন',role:'সভাপতি, পরিচালনা পর্ষদ',bio:'দীর্ঘ ২৫ বছর ধরে শিক্ষাক্ষেত্রে অবদান রাখছেন।',message:'শিক্ষাই জাতির মেরুদণ্ড। আমাদের বিদ্যালয় সেই মেরুদণ্ড গঠনে প্রতিশ্রুতিবদ্ধ।'},
+  headTeacher:{photo:'https://randomuser.me/api/portraits/men/11.jpg',name:'মোঃ আব্দুল করিম',role:'প্রধান শিক্ষক',bio:'এম.এ (বাংলা), বি.এড। শিক্ষকতায় ২০ বছরের অভিজ্ঞতা।',message:'প্রতিটি শিক্ষার্থীর সুপ্ত প্রতিভা বিকশিত করাই আমাদের লক্ষ্য।'},
+  teachers:[{id:1,photo:'https://randomuser.me/api/portraits/men/11.jpg',name:'মোঃ আব্দুল করিম',role:'প্রধান শিক্ষক',subject:'বাংলা',phone:'০১৭১১-১১১১১১'}],
+  employees:[{id:1,photo:'https://randomuser.me/api/portraits/men/16.jpg',name:'মোঃ আনোয়ার হোসেন',role:'অফিস সহকারী',phone:'০১৮১১-১১১১১১'}],
+  students:[{cls:'ষষ্ঠ শ্রেণি',boys:110,girls:105},{cls:'সপ্তম শ্রেণি',boys:108,girls:102},{cls:'অষ্টম শ্রেণি',boys:100,girls:98},{cls:'নবম শ্রেণি',boys:165,girls:170},{cls:'দশম শ্রেণি',boys:156,girls:161}],
+  notices:[{id:1,title:'বার্ষিক পরীক্ষার রুটিন প্রকাশ',body:'বার্ষিক পরীক্ষার রুটিন আজ প্রকাশ করা হলো।',date:'2026-05-20',status:'published'}],
+  holidays:[{id:1,title:'ঈদুল ফিতর',reason:'ধর্মীয় ছুটি',start:'2026-04-10',end:'2026-04-15'}],
+  albums:[{id:1,name:'বিদ্যালয়ের ছবি',cover:'https://images.unsplash.com/photo-1517649763962-0c623066013b?w=600',images:['https://images.unsplash.com/photo-1517649763962-0c623066013b?w=600']}],
+  complaints:[],
+  applications:[]
+};
+
+let DB = {};
+let currentUser = null;
+
+/* ============ FIREBASE AUTH & SYNC ============ */
+auth.onAuthStateChanged(user => {
+  currentUser = user;
+  if (user) {
+    document.getElementById('userEmailLabel').textContent = user.email;
+    syncWithFirebase();
+  } else {
+    document.getElementById('appLoader').classList.add('hidden');
+    showLogin();
+  }
+});
+
+document.getElementById('loginForm').onsubmit = e => {
+  e.preventDefault();
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  const btn = document.getElementById('loginBtn');
+  const err = document.getElementById('loginErr');
+  
+  btn.textContent = 'অপেক্ষা করুন...';
+  btn.disabled = true;
+  err.classList.add('hidden');
+
+  auth.signInWithEmailAndPassword(email, pass)
+    .catch(error => {
+      // Auto create for demo purpose if not exists
+      if(error.code === 'auth/user-not-found' && email === 'admin@hazariganj.edu.bd') {
+        return auth.createUserWithEmailAndPassword(email, pass);
+      }
+      throw error;
+    })
+    .then(() => {
+      btn.textContent = 'লগইন করুন';
+      btn.disabled = false;
+    })
+    .catch(error => {
+      let msg = 'লগইন ব্যর্থ হয়েছে।';
+      if(error.code === 'auth/wrong-password') msg = 'পাসওয়ার্ড ভুল হয়েছে।';
+      else if(error.code === 'auth/user-not-found') msg = 'এই ইমেইলে কোনো অ্যাকাউন্ট নেই।';
+      err.textContent = msg;
+      err.classList.remove('hidden');
+      btn.textContent = 'লগইন করুন';
+      btn.disabled = false;
+    });
+};
+
+function logout(){
+  auth.signOut();
+}
+
+function syncWithFirebase() {
+  database.ref('hgs_school_data').on('value', (snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+      // Ensure new nodes exist
+      if(!data.applications) data.applications = [];
+      if(!data.settings.eiin) data.settings.eiin = defaults.settings.eiin;
+      if(!data.settings.schoolCode) data.settings.schoolCode = defaults.settings.schoolCode;
+      if(!data.settings.shift) data.settings.shift = defaults.settings.shift;
+      if(!data.settings.topBar) data.settings.topBar = defaults.settings.topBar;
+      DB = data;
+    } else {
+      DB = defaults;
+      save();
+    }
+    
+    document.getElementById('appLoader').classList.add('hidden');
+    showApp();
+  });
+}
+
+function save() {
+  database.ref('hgs_school_data').set(DB)
+    .catch(err => toast("সিঙ্ক সমস্যা: " + err.message, 1));
+}
+
+/* ============ HELPERS ============ */
+function nextId(arr){return arr&&arr.length?Math.max(...arr.map(x=>x.id))+1:1}
+function toBn(n){return String(n).replace(/[0-9]/g,d=>'০১২৩৪৫৬৭৮৯'[d])}
+function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function toast(msg,err){const d=document.createElement('div');d.className='toast';if(err)d.style.background='#dc2626';d.innerHTML=`<div class="flex items-center gap-2"><span>${err?'⚠️':'✅'}</span> ${msg}</div>`;document.getElementById('toastRoot').appendChild(d);setTimeout(()=>d.remove(),3000)}
+function confirmAct(msg){return confirm(msg)}
+
+/* ============ UI CONTROLS ============ */
+function showLogin(){
+  document.getElementById('loginScreen').classList.remove('hidden');
+  document.getElementById('app').classList.add('hidden');
+}
+function showApp(){
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+  renderNav();
+  go(current); 
+}
+
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  sb.classList.toggle('-translate-x-full');
+  overlay.classList.toggle('hidden');
+}
+
+/* ============ NAVIGATION ============ */
+const PAGES=[
+  {id:'dashboard',icon:'🏠',label:'ড্যাশবোর্ড'},
+  {id:'applications',icon:'📝',label:'আবেদন ব্যবস্থাপনা'},
+  {id:'complaints',icon:'📨',label:'অভিযোগ ব্যবস্থাপনা'},
+  {id:'teachers',icon:'👨‍🏫',label:'শিক্ষক ব্যবস্থাপনা'},
+  {id:'employees',icon:'👨‍💼',label:'কর্মচারী ব্যবস্থাপনা'},
+  {id:'students',icon:'👨‍🎓',label:'শিক্ষার্থী ব্যবস্থাপনা'},
+  {id:'notices',icon:'📢',label:'নোটিশ ব্যবস্থাপনা'},
+  {id:'holidays',icon:'📅',label:'ছুটির ব্যবস্থাপনা'},
+  {id:'gallery',icon:'🖼️',label:'গ্যালারি ব্যবস্থাপনা'},
+  {id:'chairman',icon:'👨‍💼',label:'সভাপতির পরিচিতি'},
+  {id:'headTeacher',icon:'👨‍🏫',label:'প্রধান শিক্ষক'},
+  {id:'contact',icon:'📞',label:'যোগাযোগ তথ্য'},
+  {id:'settings',icon:'⚙️',label:'ওয়েবসাইট সেটিংস'},
+  {id:'security',icon:'🔐',label:'নিরাপত্তা ও ব্যাকআপ'}
+];
+
+let current='dashboard';
+
+function renderNav(){
+  const navMenu = document.getElementById('navMenu');
+  navMenu.innerHTML=PAGES.map(p=>`<button class="nav-btn ${p.id===current?'active':''}" onclick="go('${p.id}')"><span class="text-lg w-6 text-center">${p.icon}</span><span class="flex-grow text-left">${p.label}</span></button>`).join('')
+}
+
+function go(p){
+  current=p;
+  renderNav();
+  document.getElementById('pageTitle').textContent=PAGES.find(x=>x.id===p).label;
+  
+  // Close sidebar on mobile after clicking
+  if(window.innerWidth<1024) {
+    document.getElementById('sidebar').classList.add('-translate-x-full');
+    document.getElementById('sidebarOverlay').classList.add('hidden');
+  }
+  
+  PAGE_RENDERERS[p]();
+}
+
+/* ============ MODAL ============ */
+function openModal(html){modalRoot.innerHTML=`<div class="modal-bg" onclick="if(event.target===this)closeModal()"><div class="modal p-6 md:p-8 animate-[slideIn_0.2s_ease-out]">${html}</div></div>`}
+function closeModal(){modalRoot.innerHTML=''}
+
+/* ============ PAGE RENDERERS ============ */
+const PAGE_RENDERERS={};
+
+PAGE_RENDERERS.dashboard=()=>{
+  const totalStu=(DB.students||[]).reduce((a,c)=>a+c.boys+c.girls,0);
+  const pendingApps=(DB.applications||[]).filter(a=>a.status==='pending').length;
+  const pendingComps=(DB.complaints||[]).filter(c=>c.status==='pending').length;
+  
+  const stats=[
+    {l:'মোট শিক্ষার্থী',v:totalStu,c:'from-emerald-500 to-emerald-700',i:'👨‍🎓'},
+    {l:'মোট শিক্ষক',v:(DB.teachers||[]).length,c:'from-blue-500 to-blue-700',i:'👨‍🏫'},
+    {l:'নতুন আবেদন',v:pendingApps,c:'from-purple-500 to-purple-700',i:'📝', alert: pendingApps>0},
+    {l:'নতুন অভিযোগ',v:pendingComps,c:'from-red-500 to-red-700',i:'📨', alert: pendingComps>0},
+    {l:'প্রকাশিত নোটিশ',v:(DB.notices||[]).length,c:'from-yellow-500 to-amber-600',i:'📢'},
+    {l:'গ্যালারি ছবি',v:(DB.albums||[]).reduce((a,c)=>a+c.images.length,0),c:'from-pink-500 to-pink-700',i:'🖼️'}
+  ];
+  
+  document.getElementById('mainContent').innerHTML=`
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+      ${stats.map(s=>`<div class="card p-5 bg-gradient-to-br ${s.c} text-white border-0 relative overflow-hidden group">
+        ${s.alert ? '<span class="absolute top-2 right-2 flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-white"></span></span>' : ''}
+        <div class="text-3xl mb-3 opacity-80 group-hover:scale-110 transition-transform origin-left">${s.i}</div>
+        <div class="text-3xl font-bold serif leading-none">${toBn(s.v)}</div>
+        <div class="text-[13px] font-medium opacity-90 mt-2">${s.l}</div>
+      </div>`).join('')}
+    </div>
+    
+    <div class="grid lg:grid-cols-2 gap-6">
+      <div class="card p-0 overflow-hidden flex flex-col">
+        <div class="bg-slate-50 p-4 border-b flex justify-between items-center">
+          <h3 class="serif font-bold text-lg text-slate-900">📝 সাম্প্রতিক আবেদন</h3>
+          <button onclick="go('applications')" class="text-sm font-bold text-primary hover:text-gold">সব দেখুন</button>
+        </div>
+        <div class="p-4 flex-grow">
+          ${(DB.applications||[]).slice(-5).reverse().map(a=>`<div class="py-3 border-b border-slate-100 last:border-0"><div class="font-bold text-slate-800">${esc(a.name)} <span class="text-xs text-slate-500 font-normal">(${esc(a.class)} শ্রেণি)</span></div><div class="text-sm text-slate-600 mt-1">ধরন: ${esc(a.type)} · ${esc(a.date)} · ${statusBadge(a.status)}</div></div>`).join('')||'<div class="text-center py-8 text-slate-500">কোনো নতুন আবেদন নেই।</div>'}
+        </div>
+      </div>
+      
+      <div class="card p-0 overflow-hidden flex flex-col">
+        <div class="bg-slate-50 p-4 border-b flex justify-between items-center">
+          <h3 class="serif font-bold text-lg text-slate-900">📨 সাম্প্রতিক অভিযোগ</h3>
+          <button onclick="go('complaints')" class="text-sm font-bold text-primary hover:text-gold">সব দেখুন</button>
+        </div>
+        <div class="p-4 flex-grow">
+          ${(DB.complaints||[]).slice(-5).reverse().map(c=>`<div class="py-3 border-b border-slate-100 last:border-0"><div class="font-bold text-slate-800">${esc(c.subject)}</div><div class="text-sm text-slate-600 mt-1">${esc(c.name)} · ${esc(c.date)} · ${statusBadge(c.status)}</div></div>`).join('')||'<div class="text-center py-8 text-slate-500">কোনো নতুন অভিযোগ নেই।</div>'}
+        </div>
+      </div>
+    </div>`;
+};
+
+function statusBadge(s){
+  const m={
+    pending:['অপেক্ষমাণ','bg-amber-100 text-amber-700 border border-amber-200'],
+    read:['পঠিত','bg-blue-100 text-blue-700 border border-blue-200'],
+    approved:['অনুমোদিত','bg-emerald-100 text-emerald-700 border border-emerald-200'],
+    rejected:['বাতিল','bg-red-100 text-red-700 border border-red-200'],
+    resolved:['সমাধানকৃত','bg-emerald-100 text-emerald-700 border border-emerald-200']
+  };
+  const x=m[s]||['অজানা','bg-slate-100 border border-slate-200'];
+  return `<span class="badge ${x[1]}">${x[0]}</span>`;
+}
+
+/* ===== APPLICATIONS (NEW) ===== */
+PAGE_RENDERERS.applications=()=>{
+  const apps = DB.applications || [];
+  document.getElementById('mainContent').innerHTML=`
+    <div class="card table-responsive">
+      <table>
+        <thead><tr><th>নাম ও শ্রেণি</th><th>আবেদনের ধরন</th><th>মোবাইল</th><th>তারিখ</th><th>স্ট্যাটাস</th><th class="text-right">অ্যাকশন</th></tr></thead>
+        <tbody>${apps.slice().reverse().map(a=>`<tr>
+          <td><div class="font-bold">${esc(a.name)}</div><div class="text-xs text-slate-500">${esc(a.class)} শ্রেণি | রোল: ${esc(a.roll)}</div></td>
+          <td class="font-medium">${esc(a.type)}</td><td>${esc(a.phone)}</td><td>${toBn(a.date)}</td><td>${statusBadge(a.status)}</td>
+          <td class="text-right"><button class="btn btn-outline text-xs" onclick="viewApp(${a.id})">বিস্তারিত</button> <button class="btn btn-danger text-xs" onclick="delApp(${a.id})">মুছুন</button></td>
+        </tr>`).join('')||'<tr><td colspan="6" class="text-center py-10 text-slate-500 font-medium">কোনো আবেদন জমা পড়েনি।</td></tr>'}</tbody>
+      </table>
+    </div>`;
+};
+
+function viewApp(id){
+  const a=DB.applications.find(x=>x.id===id);
+  openModal(`<h3 class="serif text-xl font-bold mb-4 border-b pb-2">আবেদনের বিস্তারিত</h3>
+    <div class="grid grid-cols-2 gap-y-4 gap-x-6 text-sm mb-6">
+      <div><span class="text-slate-500 block mb-1">শিক্ষার্থীর নাম</span><strong class="text-base">${esc(a.name)}</strong></div>
+      <div><span class="text-slate-500 block mb-1">আবেদনের ধরন</span><strong class="text-base text-primary">${esc(a.type)}</strong></div>
+      <div><span class="text-slate-500 block mb-1">শ্রেণি ও রোল</span><strong>${esc(a.class)} শ্রেণি, রোল: ${esc(a.roll)}</strong></div>
+      <div><span class="text-slate-500 block mb-1">মোবাইল নম্বর</span><strong>${esc(a.phone)}</strong></div>
+      <div class="col-span-2"><span class="text-slate-500 block mb-1">আবেদনের তারিখ</span><strong>${toBn(a.date)}</strong></div>
+      <div class="col-span-2"><span class="text-slate-500 block mb-1">বিস্তারিত বিবরণ</span><div class="bg-slate-50 p-4 rounded-lg border border-slate-100 text-base leading-relaxed">${esc(a.details||'-')}</div></div>
+      <div class="col-span-2"><span class="text-slate-500 block mb-2">বর্তমান অবস্থা</span>${statusBadge(a.status)}</div>
+    </div>
+    <div class="flex flex-wrap gap-2 border-t pt-4">
+      <button class="btn btn-primary text-sm" onclick="setAppStatus(${id},'approved')">✅ অনুমোদন করুন</button>
+      <button class="btn btn-danger text-sm" onclick="setAppStatus(${id},'rejected')">❌ বাতিল করুন</button>
+      <button class="btn btn-outline text-sm" onclick="setAppStatus(${id},'pending')">অপেক্ষমাণ রাখুন</button>
+      <button class="btn btn-outline ml-auto text-sm bg-slate-100" onclick="closeModal()">বন্ধ করুন</button>
+    </div>`);
+}
+function setAppStatus(id,s){DB.applications.find(x=>x.id===id).status=s;save();closeModal();PAGE_RENDERERS.applications();toast('আবেদনের অবস্থা আপডেট হয়েছে');}
+function delApp(id){if(confirmAct('আবেদনটি মুছে ফেলবেন?')){DB.applications=DB.applications.filter(x=>x.id!==id);save();PAGE_RENDERERS.applications();toast('মুছে ফেলা হয়েছে');}}
+
+/* ===== COMPLAINTS ===== */
+PAGE_RENDERERS.complaints=()=>{
+  const comps = DB.complaints || [];
+  document.getElementById('mainContent').innerHTML=`
+    <div class="card table-responsive">
+      <table>
+        <thead><tr><th>নাম ও মোবাইল</th><th>বিষয়</th><th>তারিখ</th><th>স্ট্যাটাস</th><th class="text-right">অ্যাকশন</th></tr></thead>
+        <tbody>${comps.slice().reverse().map(c=>`<tr>
+          <td><div class="font-bold">${esc(c.name)}</div><div class="text-xs text-slate-500">${esc(c.phone)}</div></td>
+          <td class="font-medium text-primary">${esc(c.subject)}</td><td>${toBn(c.date)}</td><td>${statusBadge(c.status)}</td>
+          <td class="text-right"><button class="btn btn-outline text-xs" onclick="viewComp(${c.id})">বিস্তারিত</button> <button class="btn btn-danger text-xs" onclick="delComp(${c.id})">মুছুন</button></td>
+        </tr>`).join('')||'<tr><td colspan="5" class="text-center py-10 text-slate-500 font-medium">কোনো অভিযোগ নেই।</td></tr>'}</tbody>
+      </table>
+    </div>`;
+};
+function viewComp(id){
+  const c=DB.complaints.find(x=>x.id===id);
+  openModal(`<h3 class="serif text-xl font-bold mb-4 border-b pb-2">অভিযোগের বিস্তারিত</h3>
+    <div class="space-y-4 text-sm mb-6">
+      <div class="grid grid-cols-2 gap-4">
+        <div><span class="text-slate-500 block mb-1">নাম</span><strong class="text-base">${esc(c.name)}</strong></div>
+        <div><span class="text-slate-500 block mb-1">মোবাইল</span><strong>${esc(c.phone)}</strong></div>
+      </div>
+      <div><span class="text-slate-500 block mb-1">বিষয়</span><strong class="text-base text-red-600">${esc(c.subject)}</strong></div>
+      <div><span class="text-slate-500 block mb-1">তারিখ</span><strong>${toBn(c.date)}</strong></div>
+      <div><span class="text-slate-500 block mb-1">বিবরণ</span><div class="bg-red-50 p-4 rounded-lg border border-red-100 text-base leading-relaxed">${esc(c.body||'-')}</div></div>
+      <div><span class="text-slate-500 block mb-2">স্ট্যাটাস</span>${statusBadge(c.status)}</div>
+    </div>
+    <div class="flex flex-wrap gap-2 border-t pt-4">
+      <button class="btn btn-gold text-sm" onclick="setCompStatus(${id},'resolved')">✅ সমাধান হয়েছে</button>
+      <button class="btn btn-outline text-sm" onclick="setCompStatus(${id},'read')">পঠিত মার্ক করুন</button>
+      <button class="btn btn-outline ml-auto text-sm bg-slate-100" onclick="closeModal()">বন্ধ করুন</button>
+    </div>`);
+}
+function setCompStatus(id,s){DB.complaints.find(x=>x.id===id).status=s;save();closeModal();PAGE_RENDERERS.complaints();toast('আপডেট হয়েছে')}
+function delComp(id){if(confirmAct('মুছে ফেলবেন?')){DB.complaints=DB.complaints.filter(x=>x.id!==id);save();PAGE_RENDERERS.complaints();toast('মুছে ফেলা হয়েছে')}}
+
+/* ===== TEACHERS ===== */
+PAGE_RENDERERS.teachers=()=>{
+  const teachers = DB.teachers || [];
+  document.getElementById('mainContent').innerHTML=`
+    <div class="flex flex-col sm:flex-row gap-3 mb-4 items-center justify-between">
+      <input id="tSearch" class="input w-full sm:max-w-xs" placeholder="🔍 নাম বা বিষয় দিয়ে খুঁজুন..." oninput="renderTeachers()">
+      <button class="btn btn-gold w-full sm:w-auto" onclick="teacherForm()">+ নতুন শিক্ষক যুক্ত করুন</button>
+    </div>
+    <div class="card table-responsive"><table><thead><tr><th>ছবি ও নাম</th><th>পদবি ও বিষয়</th><th>মোবাইল</th><th class="text-right">অ্যাকশন</th></tr></thead><tbody id="tBody"></tbody></table></div>`;
+  renderTeachers();
+};
+function renderTeachers(){
+  const q=(document.getElementById('tSearch').value||'').toLowerCase();
+  const list=(DB.teachers||[]).filter(t=>!q||t.name.toLowerCase().includes(q)||t.subject.toLowerCase().includes(q));
+  document.getElementById('tBody').innerHTML=list.map(t=>`<tr>
+    <td><div class="flex items-center gap-3"><img src="${esc(t.photo)}" class="w-10 h-10 rounded-full object-cover shadow-sm" onerror="this.src='https://via.placeholder.com/40'"><span class="font-bold">${esc(t.name)}</span></div></td>
+    <td><div class="font-medium">${esc(t.role)}</div><div class="text-xs text-slate-500">${esc(t.subject)}</div></td>
+    <td>${esc(t.phone)}</td>
+    <td class="text-right"><button class="btn btn-outline text-xs" onclick="teacherForm(${t.id})">এডিট</button> <button class="btn btn-danger text-xs" onclick="delTeacher(${t.id})">ডিলিট</button></td>
+  </tr>`).join('')||'<tr><td colspan="4" class="text-center text-slate-500 py-10 font-medium">কোনো শিক্ষকের তথ্য নেই।</td></tr>';
+}
+function teacherForm(id){
+  const t=id?DB.teachers.find(x=>x.id===id):{photo:'',name:'',role:'',subject:'',phone:''};
+  openModal(`<h3 class="serif text-xl font-bold mb-4 border-b pb-2">${id?'শিক্ষকের তথ্য এডিট':'নতুন শিক্ষক এন্ট্রি'}</h3>
+    <form onsubmit="saveTeacher(event,${id||'null'})" class="space-y-4">
+      <div><label class="label">ছবির লিংক (URL)</label><input class="input" name="photo" value="${esc(t.photo)}" placeholder="https://..."></div>
+      <div><label class="label">সম্পূর্ণ নাম *</label><input class="input" name="name" value="${esc(t.name)}" required></div>
+      <div class="grid grid-cols-2 gap-4">
+        <div><label class="label">পদবি *</label><input class="input" name="role" value="${esc(t.role)}" required placeholder="যেমন: সহকারী শিক্ষক"></div>
+        <div><label class="label">বিষয় *</label><input class="input" name="subject" value="${esc(t.subject)}" required></div>
+      </div>
+      <div><label class="label">মোবাইল নম্বর</label><input class="input" name="phone" value="${esc(t.phone)}"></div>
+      <div class="flex gap-2 justify-end pt-4 border-t"><button type="button" class="btn btn-outline" onclick="closeModal()">বাতিল</button><button class="btn btn-primary">সেভ করুন</button></div>
+    </form>`);
+}
+function saveTeacher(e,id){e.preventDefault();const f=Object.fromEntries(new FormData(e.target));if(!DB.teachers) DB.teachers=[];if(id){Object.assign(DB.teachers.find(x=>x.id===id),f)}else{DB.teachers.push({id:nextId(DB.teachers),...f})}save();closeModal();renderTeachers();toast('সফলভাবে সংরক্ষিত হয়েছে')}
+function delTeacher(id){if(confirmAct('এই শিক্ষকের তথ্য মুছে ফেলবেন?')){DB.teachers=DB.teachers.filter(x=>x.id!==id);save();renderTeachers();toast('মুছে ফেলা হয়েছে')}}
+
+/* ===== EMPLOYEES ===== */
+PAGE_RENDERERS.employees=()=>{
+  document.getElementById('mainContent').innerHTML=`
+    <div class="flex flex-col sm:flex-row gap-3 mb-4 items-center justify-between">
+      <input id="eSearch" class="input w-full sm:max-w-xs" placeholder="🔍 নাম দিয়ে খুঁজুন..." oninput="renderEmployees()">
+      <button class="btn btn-gold w-full sm:w-auto" onclick="empForm()">+ নতুন কর্মচারী যুক্ত করুন</button>
+    </div>
+    <div class="card table-responsive"><table><thead><tr><th>ছবি ও নাম</th><th>পদবি</th><th>মোবাইল</th><th class="text-right">অ্যাকশন</th></tr></thead><tbody id="eBody"></tbody></table></div>`;
+  renderEmployees();
+};
+function renderEmployees(){
+  const q=(document.getElementById('eSearch').value||'').toLowerCase();
+  const l=(DB.employees||[]).filter(t=>!q||t.name.toLowerCase().includes(q));
+  document.getElementById('eBody').innerHTML=l.map(t=>`<tr>
+    <td><div class="flex items-center gap-3"><img src="${esc(t.photo)}" class="w-10 h-10 rounded-full object-cover shadow-sm" onerror="this.src='https://via.placeholder.com/40'"><span class="font-bold">${esc(t.name)}</span></div></td>
+    <td class="font-medium">${esc(t.role)}</td><td>${esc(t.phone)}</td>
+    <td class="text-right"><button class="btn btn-outline text-xs" onclick="empForm(${t.id})">এডিট</button> <button class="btn btn-danger text-xs" onclick="delEmp(${t.id})">ডিলিট</button></td>
+  </tr>`).join('')||'<tr><td colspan="4" class="text-center text-slate-500 py-10 font-medium">কোনো কর্মচারীর তথ্য নেই।</td></tr>';
+}
+function empForm(id){
+  const t=id?DB.employees.find(x=>x.id===id):{photo:'',name:'',role:'',phone:''};
+  openModal(`<h3 class="serif text-xl font-bold mb-4 border-b pb-2">${id?'কর্মচারীর তথ্য এডিট':'নতুন কর্মচারী এন্ট্রি'}</h3>
+    <form onsubmit="saveEmp(event,${id||'null'})" class="space-y-4">
+      <div><label class="label">ছবির লিংক (URL)</label><input class="input" name="photo" value="${esc(t.photo)}"></div>
+      <div><label class="label">সম্পূর্ণ নাম *</label><input class="input" name="name" value="${esc(t.name)}" required></div>
+      <div><label class="label">পদবি *</label><input class="input" name="role" value="${esc(t.role)}" required></div>
+      <div><label class="label">মোবাইল নম্বর</label><input class="input" name="phone" value="${esc(t.phone)}"></div>
+      <div class="flex gap-2 justify-end pt-4 border-t"><button type="button" class="btn btn-outline" onclick="closeModal()">বাতিল</button><button class="btn btn-primary">সেভ করুন</button></div>
+    </form>`);
+}
+function saveEmp(e,id){e.preventDefault();const f=Object.fromEntries(new FormData(e.target));if(!DB.employees) DB.employees=[];if(id){Object.assign(DB.employees.find(x=>x.id===id),f)}else{DB.employees.push({id:nextId(DB.employees),...f})}save();closeModal();renderEmployees();toast('সফলভাবে সংরক্ষিত')}
+function delEmp(id){if(confirmAct('এই কর্মচারীর তথ্য মুছে ফেলবেন?')){DB.employees=DB.employees.filter(x=>x.id!==id);save();renderEmployees();toast('মুছে ফেলা হয়েছে')}}
+
+/* ===== STUDENTS ===== */
+PAGE_RENDERERS.students=()=>{
+  const total=(DB.students||[]).reduce((a,c)=>a+c.boys+c.girls,0);
+  document.getElementById('mainContent').innerHTML=`
+    <div class="card p-6 mb-6 bg-gradient-to-r from-emerald-600 to-teal-700 text-white border-0 shadow-lg">
+      <div class="text-sm font-medium opacity-90 mb-1">বিদ্যালয়ের সর্বমোট শিক্ষার্থী</div>
+      <div class="text-5xl font-bold serif">${toBn(total)} <span class="text-lg font-normal opacity-80">জন</span></div>
+    </div>
+    <div class="card table-responsive"><table><thead><tr><th>শ্রেণি</th><th>ছাত্র সংখ্যা</th><th>ছাত্রী সংখ্যা</th><th>মোট</th></tr></thead>
+    <tbody>${(DB.students||[]).map((s,i)=>`<tr>
+      <td class="font-bold text-slate-800 text-base">${esc(s.cls)}</td>
+      <td><input type="number" class="input text-center font-bold" style="max-width:120px" value="${s.boys}" onchange="DB.students[${i}].boys=+this.value;save();PAGE_RENDERERS.students()"></td>
+      <td><input type="number" class="input text-center font-bold" style="max-width:120px" value="${s.girls}" onchange="DB.students[${i}].girls=+this.value;save();PAGE_RENDERERS.students()"></td>
+      <td class="font-bold text-primary text-lg">${toBn(s.boys+s.girls)}</td>
+      </tr>`).join('')}</tbody></table></div>`;
+};
+
+/* ===== NOTICES ===== */
+PAGE_RENDERERS.notices=()=>{
+  document.getElementById('mainContent').innerHTML=`
+    <div class="flex justify-end mb-4"><button class="btn btn-gold shadow-md" onclick="noticeForm()">+ নতুন নোটিশ প্রকাশ</button></div>
+    <div class="card table-responsive"><table><thead><tr><th>নোটিশের শিরোনাম</th><th>তারিখ</th><th>স্ট্যাটাস</th><th class="text-right">অ্যাকশন</th></tr></thead>
+    <tbody>${(DB.notices||[]).slice().reverse().map(n=>`<tr>
+      <td><div class="font-bold text-primary whitespace-normal max-w-sm line-clamp-1">${esc(n.title)}</div></td><td>${toBn(n.date)}</td>
+      <td>${n.status==='published'?'<span class="badge bg-green-100 text-green-700">প্রকাশিত</span>':'<span class="badge bg-amber-100 text-amber-700">খসড়া</span>'}</td>
+      <td class="text-right"><button class="btn btn-outline text-xs" onclick="noticeForm(${n.id})">এডিট</button> <button class="btn btn-danger text-xs" onclick="delNotice(${n.id})">ডিলিট</button></td>
+    </tr>`).join('')||'<tr><td colspan="4" class="text-center py-10 text-slate-500 font-medium">কোনো নোটিশ নেই।</td></tr>'}</tbody></table></div>`;
+};
+function noticeForm(id){
+  const t=id?DB.notices.find(x=>x.id===id):{title:'',body:'',date:new Date().toISOString().slice(0,10),status:'published'};
+  openModal(`<h3 class="serif text-xl font-bold mb-4 border-b pb-2">${id?'নোটিশ এডিট করুন':'নতুন নোটিশ লিখুন'}</h3>
+    <form onsubmit="saveNotice(event,${id||'null'})" class="space-y-4">
+      <div><label class="label">শিরোনাম *</label><input class="input font-bold" name="title" value="${esc(t.title)}" required></div>
+      <div><label class="label">বিস্তারিত বিবরণ *</label><textarea class="textarea" name="body" rows="6" required>${esc(t.body)}</textarea></div>
+      <div class="grid grid-cols-2 gap-4">
+        <div><label class="label">প্রকাশের তারিখ</label><input type="date" class="input" name="date" value="${esc(t.date)}"></div>
+        <div><label class="label">স্ট্যাটাস</label><select class="select" name="status"><option value="published" ${t.status==='published'?'selected':''}>ওয়েবসাইটে প্রকাশ করুন</option><option value="draft" ${t.status==='draft'?'selected':''}>খসড়া হিসেবে রাখুন</option></select></div>
+      </div>
+      <div class="flex gap-2 justify-end pt-4 border-t"><button type="button" class="btn btn-outline" onclick="closeModal()">বাতিল</button><button class="btn btn-primary">সেভ করুন</button></div>
+    </form>`);
+}
+function saveNotice(e,id){e.preventDefault();const f=Object.fromEntries(new FormData(e.target));if(!DB.notices)DB.notices=[];if(id){Object.assign(DB.notices.find(x=>x.id===id),f)}else{DB.notices.push({id:nextId(DB.notices),...f})}save();closeModal();PAGE_RENDERERS.notices();toast('সফলভাবে সংরক্ষিত')}
+function delNotice(id){if(confirmAct('এই নোটিশটি মুছে ফেলবেন?')){DB.notices=DB.notices.filter(x=>x.id!==id);save();PAGE_RENDERERS.notices();toast('মুছে ফেলা হয়েছে')}}
+
+/* ===== HOLIDAYS ===== */
+PAGE_RENDERERS.holidays=()=>{
+  document.getElementById('mainContent').innerHTML=`
+    <div class="flex justify-end mb-4"><button class="btn btn-gold shadow-md" onclick="holForm()">+ নতুন ছুটি যোগ করুন</button></div>
+    <div class="card table-responsive"><table><thead><tr><th>ছুটির বিবরণ</th><th>কারণ</th><th>শুরুর তারিখ</th><th>শেষের তারিখ</th><th class="text-right">অ্যাকশন</th></tr></thead>
+    <tbody>${(DB.holidays||[]).map(h=>`<tr>
+      <td class="font-bold text-red-600">${esc(h.title)}</td><td>${esc(h.reason)}</td><td class="font-medium">${toBn(h.start)}</td><td class="font-medium">${toBn(h.end)}</td>
+      <td class="text-right"><button class="btn btn-outline text-xs" onclick="holForm(${h.id})">এডিট</button> <button class="btn btn-danger text-xs" onclick="delHol(${h.id})">ডিলিট</button></td>
+    </tr>`).join('')||'<tr><td colspan="5" class="text-center py-10 text-slate-500 font-medium">কোনো ছুটির তালিকা নেই।</td></tr>'}</tbody></table></div>`;
+};
+function holForm(id){
+  const t=id?DB.holidays.find(x=>x.id===id):{title:'',reason:'',start:'',end:''};
+  openModal(`<h3 class="serif text-xl font-bold mb-4 border-b pb-2">${id?'ছুটি এডিট':'নতুন ছুটি এন্ট্রি'}</h3>
+    <form onsubmit="saveHol(event,${id||'null'})" class="space-y-4">
+      <div><label class="label">ছুটির নাম/বিবরণ *</label><input class="input font-bold" name="title" value="${esc(t.title)}" required></div>
+      <div><label class="label">কারণ (ঐচ্ছিক)</label><input class="input" name="reason" value="${esc(t.reason)}"></div>
+      <div class="grid grid-cols-2 gap-4">
+        <div><label class="label">শুরুর তারিখ *</label><input type="date" class="input" name="start" value="${esc(t.start)}" required></div>
+        <div><label class="label">শেষের তারিখ *</label><input type="date" class="input" name="end" value="${esc(t.end)}" required></div>
+      </div>
+      <div class="flex gap-2 justify-end pt-4 border-t"><button type="button" class="btn btn-outline" onclick="closeModal()">বাতিল</button><button class="btn btn-primary">সেভ করুন</button></div>
+    </form>`);
+}
+function saveHol(e,id){e.preventDefault();const f=Object.fromEntries(new FormData(e.target));if(!DB.holidays)DB.holidays=[];if(id){Object.assign(DB.holidays.find(x=>x.id===id),f)}else{DB.holidays.push({id:nextId(DB.holidays),...f})}save();closeModal();PAGE_RENDERERS.holidays();toast('সফলভাবে সংরক্ষিত')}
+function delHol(id){if(confirmAct('এই ছুটিটি মুছে ফেলবেন?')){DB.holidays=DB.holidays.filter(x=>x.id!==id);save();PAGE_RENDERERS.holidays();toast('মুছে ফেলা হয়েছে')}}
+
+/* ===== GALLERY ===== */
+PAGE_RENDERERS.gallery=()=>{
+  document.getElementById('mainContent').innerHTML=`
+    <div class="flex justify-end mb-4"><button class="btn btn-gold shadow-md" onclick="albumForm()">+ নতুন ফটো অ্যালবাম</button></div>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">${(DB.albums||[]).map(a=>`
+      <div class="card overflow-hidden group">
+        <div class="relative h-48 overflow-hidden">
+          <img src="${esc(a.cover)}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.src='https://via.placeholder.com/400x300'">
+          <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-4">
+            <h3 class="font-bold serif text-white text-lg leading-tight">${esc(a.name)}</h3>
+            <p class="text-xs text-yellow-300 font-bold mt-1">${toBn((a.images||[]).length)} টি ছবি</p>
+          </div>
+        </div>
+        <div class="p-4 bg-slate-50 flex gap-2 justify-center border-t border-slate-100">
+          <button class="btn btn-primary text-xs flex-1" onclick="manageImages(${a.id})">🖼️ ছবি পরিচালনা</button>
+          <button class="btn btn-outline text-xs px-3" onclick="albumForm(${a.id})">✏️</button>
+          <button class="btn btn-danger text-xs px-3" onclick="delAlbum(${a.id})">🗑️</button>
+        </div>
+      </div>`).join('')||'<div class="col-span-full text-center py-10 text-slate-500 font-medium">কোনো অ্যালবাম তৈরি করা হয়নি।</div>'}</div>`;
+};
+function albumForm(id){
+  const a=id?DB.albums.find(x=>x.id===id):{name:'',cover:'',images:[]};
+  openModal(`<h3 class="serif text-xl font-bold mb-4 border-b pb-2">${id?'অ্যালবাম এডিট':'নতুন অ্যালবাম তৈরি'}</h3>
+    <form onsubmit="saveAlbum(event,${id||'null'})" class="space-y-4">
+      <div><label class="label">অ্যালবামের নাম *</label><input class="input font-bold" name="name" value="${esc(a.name)}" required></div>
+      <div><label class="label">কভার ছবির লিংক (URL) *</label><input class="input" name="cover" value="${esc(a.cover)}" required></div>
+      <div class="flex gap-2 justify-end pt-4 border-t"><button type="button" class="btn btn-outline" onclick="closeModal()">বাতিল</button><button class="btn btn-primary">সেভ করুন</button></div>
+    </form>`);
+}
+function saveAlbum(e,id){e.preventDefault();const f=Object.fromEntries(new FormData(e.target));if(!DB.albums)DB.albums=[];if(id){Object.assign(DB.albums.find(x=>x.id===id),f)}else{DB.albums.push({id:nextId(DB.albums),...f,images:[f.cover]})}save();closeModal();PAGE_RENDERERS.gallery();toast('সফলভাবে সংরক্ষিত')}
+function delAlbum(id){if(confirmAct('পুরো অ্যালবাম এবং এর সব ছবি মুছে ফেলবেন?')){DB.albums=DB.albums.filter(x=>x.id!==id);save();PAGE_RENDERERS.gallery();toast('মুছে ফেলা হয়েছে')}}
+function manageImages(id){
+  const a=DB.albums.find(x=>x.id===id);
+  const imgs = a.images || [];
+  openModal(`<h3 class="serif text-xl font-bold mb-4 border-b pb-2">${esc(a.name)} <span class="text-sm font-normal text-slate-500 block sm:inline sm:ml-2">ছবি ব্যবস্থাপনা</span></h3>
+    <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 mb-4">
+      <label class="label text-primary">নতুন ছবির লিংক যোগ করুন (প্রতি লাইনে একটি লিংক)</label>
+      <textarea id="bulkImgs" class="textarea mb-2" rows="3" placeholder="https://image-link-1.jpg&#10;https://image-link-2.jpg"></textarea>
+      <button class="btn btn-gold text-sm w-full sm:w-auto" onclick="addImgs(${id})">+ ছবিগুলো গ্যালারিতে যোগ করুন</button>
+    </div>
+    <label class="label">অ্যালবামে থাকা ছবিসমূহ:</label>
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-64 overflow-y-auto p-1">
+      ${imgs.map((u,i)=>`<div class="relative group rounded-lg overflow-hidden shadow-sm border border-slate-200">
+        <img src="${esc(u)}" class="w-full h-24 object-cover" onerror="this.src='https://via.placeholder.com/150'">
+        <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+          <button onclick="rmImg(${id},${i})" class="bg-red-600 hover:bg-red-700 text-white p-2 rounded-full shadow text-xs font-bold">মুছুন</button>
+        </div>
+      </div>`).join('')||'<p class="col-span-full text-sm text-slate-500 text-center py-4">এই অ্যালবামে কোনো ছবি নেই।</p>'}
+    </div>
+    <div class="flex justify-end mt-4 pt-4 border-t"><button class="btn btn-outline bg-slate-100" onclick="closeModal()">বন্ধ করুন</button></div>`);
+}
+function addImgs(id){const urls=document.getElementById('bulkImgs').value.split('\n').map(s=>s.trim()).filter(Boolean);if(!urls.length)return;const a=DB.albums.find(x=>x.id===id);if(!a.images)a.images=[];a.images.push(...urls);save();manageImages(id);PAGE_RENDERERS.gallery();toast(toBn(urls.length)+' টি ছবি যোগ হয়েছে')}
+function rmImg(id,i){if(!confirmAct('এই ছবিটি মুছে ফেলবেন?'))return;const a=DB.albums.find(x=>x.id===id);a.images.splice(i,1);save();manageImages(id);PAGE_RENDERERS.gallery()}
+
+/* ===== CHAIRMAN / HEAD TEACHER ===== */
+function personForm(key,title){
+  const p=DB[key] || {photo:'',name:'',role:'',bio:'',message:''};
+  document.getElementById('mainContent').innerHTML=`<div class="card p-6 lg:p-8 max-w-3xl mx-auto shadow-lg">
+    <h2 class="serif text-2xl font-bold mb-6 text-primary border-b pb-2">${title}</h2>
+    <form onsubmit="savePerson(event,'${key}')" class="space-y-5">
+      <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-6 bg-slate-50 p-4 rounded-xl border border-slate-100">
+        <img id="pPreview" src="${esc(p.photo)}" class="w-32 h-32 rounded-lg object-cover border-4 border-white shadow-md bg-white" onerror="this.src='https://via.placeholder.com/150'">
+        <div class="w-full">
+          <label class="label">ছবির লিংক (URL)</label>
+          <input class="input" name="photo" value="${esc(p.photo)}" oninput="document.getElementById('pPreview').src=this.value">
+          <p class="text-xs text-slate-500 mt-2">বর্গাকার (Square) ছবি ব্যবহার করলে ভালো দেখাবে।</p>
+        </div>
+      </div>
+      <div class="grid sm:grid-cols-2 gap-5">
+        <div><label class="label">সম্পূর্ণ নাম *</label><input class="input font-bold text-lg" name="name" value="${esc(p.name)}" required></div>
+        <div><label class="label">পদবি *</label><input class="input" name="role" value="${esc(p.role)}" required></div>
+      </div>
+      <div><label class="label">সংক্ষিপ্ত পরিচিতি</label><textarea class="textarea" name="bio" rows="3" placeholder="শিক্ষাগত যোগ্যতা বা অভিজ্ঞতা...">${esc(p.bio)}</textarea></div>
+      <div><label class="label">বাণী (Message)</label><textarea class="textarea leading-relaxed" name="message" rows="6" placeholder="শিক্ষার্থী ও অভিভাবকদের উদ্দেশ্যে বার্তা...">${esc(p.message)}</textarea></div>
+      <div class="pt-4 border-t"><button class="btn btn-gold text-lg px-8 py-3 w-full sm:w-auto shadow-md">সংরক্ষণ করুন</button></div>
+    </form></div>`;
+}
+function savePerson(e,k){e.preventDefault();DB[k]=Object.fromEntries(new FormData(e.target));save();toast('সফলভাবে সংরক্ষিত হয়েছে')}
+PAGE_RENDERERS.chairman=()=>personForm('chairman','সভাপতি মহোদয়ের পরিচিতি ও বাণী');
+PAGE_RENDERERS.headTeacher=()=>personForm('headTeacher','প্রধান শিক্ষকের পরিচিতি ও বাণী');
+
+/* ===== CONTACT ===== */
+PAGE_RENDERERS.contact=()=>{
+  const c=DB.contact || {};
+  document.getElementById('mainContent').innerHTML=`<div class="card p-6 lg:p-8 max-w-2xl mx-auto shadow-lg">
+    <h2 class="serif text-2xl font-bold mb-6 text-primary border-b pb-2">যোগাযোগের তথ্য</h2>
+    <form onsubmit="saveContact(event)" class="space-y-5">
+      <div><label class="label">বিদ্যালয়ের পূর্ণাঙ্গ ঠিকানা *</label><input class="input" name="address" value="${esc(c.address)}" required></div>
+      <div class="grid sm:grid-cols-2 gap-5">
+        <div><label class="label">অফিসিয়াল ফোন নম্বর *</label><input class="input" name="phone" value="${esc(c.phone)}" required></div>
+        <div><label class="label">অফিসিয়াল ইমেইল</label><input type="email" class="input" name="email" value="${esc(c.email)}"></div>
+      </div>
+      <div>
+        <label class="label">Google Map Location Link</label>
+        <input class="input" name="map" value="${esc(c.map)}">
+        <p class="text-xs text-slate-500 mt-1">বিদ্যালয়ের গুগল ম্যাপ লিংক এখানে দিন।</p>
+      </div>
+      <div class="pt-4 border-t"><button class="btn btn-gold px-8 py-3 w-full sm:w-auto shadow-md">সেভ করুন</button></div>
+    </form></div>`;
+};
+function saveContact(e){e.preventDefault();DB.contact=Object.fromEntries(new FormData(e.target));save();toast('যোগাযোগ তথ্য আপডেট হয়েছে')}
+
+/* ===== SETTINGS ===== */
+PAGE_RENDERERS.settings=()=>{
+  const s=DB.settings || {}, h=DB.homepage || {sections:{}, sliders:[]};
+  document.getElementById('mainContent').innerHTML=`
+  <div class="grid lg:grid-cols-2 gap-6 items-start">
+    <div class="card p-6 shadow-sm border-t-4 border-primary">
+      <h3 class="serif font-bold text-xl mb-6 flex items-center gap-2"><span class="text-2xl">🏫</span> সাধারণ তথ্যাবলি</h3>
+      <form onsubmit="saveSet(event)" class="space-y-4">
+        <div><label class="label">ওয়েবসাইটের (বিদ্যালয়ের) নাম *</label><input class="input font-bold text-lg" name="name" value="${esc(s.name)}" required></div>
+        <div><label class="label">বিদ্যালয়ের স্লোগান</label><input class="input" name="slogan" value="${esc(s.slogan)}"></div>
+        <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 grid grid-cols-2 gap-4">
+           <div class="col-span-2"><label class="label text-amber-700">Top Bar স্ক্রোলিং আপডেট টেক্সট</label><input class="input border-amber-300 focus:border-amber-500" name="topBar" value="${esc(s.topBar)}" placeholder="জরুরি কোনো নোটিশ বা আপডেট..."></div>
+           <div><label class="label text-primary">ইআইআইএন (EIIN)</label><input class="input font-bold" name="eiin" value="${esc(s.eiin)}"></div>
+           <div><label class="label text-primary">স্কুল কোড</label><input class="input font-bold" name="schoolCode" value="${esc(s.schoolCode)}"></div>
+           <div><label class="label">প্রতিষ্ঠার সাল</label><input class="input" name="founded" value="${esc(s.founded)}"></div>
+           <div><label class="label">শিফট</label><input class="input" name="shift" value="${esc(s.shift)}" placeholder="যেমন: দিবা"></div>
+        </div>
+        <div><label class="label">ফুটার কপিরাইট টেক্সট</label><input class="input text-sm" name="footer" value="${esc(s.footer)}"></div>
+        <div class="pt-2"><button class="btn btn-primary w-full shadow-md py-3 text-lg">ওয়েবসাইট আপডেট করুন</button></div>
+      </form>
+    </div>
+    
+    <div class="space-y-6">
+      <div class="card p-6 shadow-sm border-t-4 border-gold">
+        <h3 class="serif font-bold text-xl mb-4 flex items-center gap-2"><span class="text-2xl">🖼️</span> হোমপেজ স্লাইডার</h3>
+        <p class="text-sm text-slate-500 mb-4">হোমপেজের স্লাইডারে যে ছবিগুলো দেখাতে চান তার লিংক নিচে দিন (প্রতি লাইনে একটি করে লিংক)।</p>
+        <textarea id="sliderText" class="textarea leading-relaxed" rows="5" placeholder="https://image-url-1.jpg&#10;https://image-url-2.jpg">${(h.sliders||[]).join('\n')}</textarea>
+        <button class="btn btn-gold w-full mt-3 shadow-md" onclick="saveSliders()">স্লাইডার ছবি আপডেট করুন</button>
+      </div>
+      
+      <div class="card p-6 shadow-sm border-t-4 border-slate-700">
+        <h3 class="serif font-bold text-xl mb-4 flex items-center gap-2"><span class="text-2xl">🎛️</span> সেকশন কন্ট্রোল</h3>
+        <p class="text-sm text-slate-500 mb-4">ওয়েবসাইটের হোমপেজে কোন সেকশনগুলো দেখাতে চান তা এখান থেকে অন/অফ করতে পারবেন।</p>
+        <div class="space-y-1 bg-slate-50 p-2 rounded border border-slate-100">
+          ${Object.entries(h.sections||{}).map(([k,v])=>`<div class="flex items-center justify-between p-3 bg-white rounded shadow-sm border border-slate-100">
+            <span class="font-bold text-slate-700">${({hero:'হিরো স্লাইডার সেকশন',stats:'পরিসংখ্যান (শিক্ষার্থী/শিক্ষক)',notices:'নোটিশ বোর্ড',gallery:'ফটো গ্যালারি',messages:'সভাপতি ও প্রধান শিক্ষকের বাণী'})[k]||k}</span>
+            <label class="switch"><input type="checkbox" ${v?'checked':''} onchange="DB.homepage.sections['${k}']=this.checked;save()"><span class="slider"></span></label>
+          </div>`).join('')}
+        </div>
+      </div>
+    </div>
+  </div>`;
+};
+function saveSet(e){e.preventDefault();DB.settings=Object.fromEntries(new FormData(e.target));save();toast('ওয়েবসাইটের তথ্য আপডেট হয়েছে')}
+function saveSliders(){DB.homepage.sliders=document.getElementById('sliderText').value.split('\n').map(s=>s.trim()).filter(Boolean);save();toast('স্লাইডারের ছবি আপডেট হয়েছে')}
+
+/* ===== SECURITY & DANGER ZONE ===== */
+PAGE_RENDERERS.security=()=>{
+  document.getElementById('mainContent').innerHTML=`
+  <div class="grid md:grid-cols-2 gap-6 items-start">
+    <div class="card p-6 shadow-sm border border-slate-200">
+      <h3 class="serif font-bold text-xl mb-6 text-slate-800 flex items-center gap-2"><span>🔐</span> অ্যাডমিন পাসওয়ার্ড পরিবর্তন</h3>
+      <form onsubmit="changeFirebasePass(event)" class="space-y-4">
+        <div><label class="label">অ্যাডমিন ইমেইল</label><input type="email" class="input bg-slate-100 text-slate-500 font-bold" value="${currentUser?currentUser.email:''}" disabled></div>
+        <div><label class="label">নতুন পাসওয়ার্ড দিন *</label><input type="password" class="input" id="newPass1" required minlength="6" placeholder="কমপক্ষে ৬ অক্ষরের পাসওয়ার্ড"></div>
+        <div><label class="label">পুনরায় নতুন পাসওয়ার্ড দিন *</label><input type="password" class="input" id="newPass2" required minlength="6"></div>
+        <div class="pt-2"><button class="btn btn-primary w-full py-3">পাসওয়ার্ড আপডেট করুন</button></div>
+        <p class="text-xs text-slate-500 mt-2 text-center">নিরাপত্তার স্বার্থে পাসওয়ার্ড পরিবর্তন করার পর আপনাকে পুনরায় লগইন করতে হতে পারে।</p>
+      </form>
+    </div>
+    
+    <div class="card p-6 shadow-md border-2 border-red-500 bg-red-50/30">
+      <h3 class="serif font-bold text-xl mb-2 text-red-700 flex items-center gap-2"><span>⚠️</span> ডেঞ্জার জোন (Danger Zone)</h3>
+      <p class="text-sm text-red-600 mb-6 font-medium">সতর্কতার সাথে এই অপশনগুলো ব্যবহার করুন। এখান থেকে ওয়েবসাইটের সমস্ত ডেটা ব্যাকআপ বা মুছে ফেলা সম্ভব।</p>
+      
+      <div class="space-y-4">
+        <div class="bg-white p-4 rounded-lg border border-red-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+           <div>
+             <h4 class="font-bold text-slate-800">ডেটা ব্যাকআপ নিন (Export)</h4>
+             <p class="text-xs text-slate-500 mt-1">ওয়েবসাইটের সম্পূর্ণ ডেটাবেস JSON ফাইল হিসেবে ডাউনলোড করুন।</p>
+           </div>
+           <button class="btn btn-outline border-blue-300 text-blue-700 hover:bg-blue-50 whitespace-nowrap w-full sm:w-auto" onclick="exportData()">📥 ডাউনলোড করুন</button>
+        </div>
+        
+        <div class="bg-white p-4 rounded-lg border border-red-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+           <div>
+             <h4 class="font-bold text-slate-800">ডেটা রিস্টোর করুন (Import)</h4>
+             <p class="text-xs text-slate-500 mt-1">পূর্বে সেভ করা JSON ফাইল আপলোড করে ডেটাবেস রিস্টোর করুন।</p>
+           </div>
+           <button class="btn btn-outline border-purple-300 text-purple-700 hover:bg-purple-50 whitespace-nowrap w-full sm:w-auto" onclick="importData()">📤 আপলোড করুন</button>
+        </div>
+        
+        <div class="bg-red-100 p-4 rounded-lg border border-red-300 flex flex-col sm:flex-row items-center justify-between gap-4 mt-6">
+           <div>
+             <h4 class="font-bold text-red-800">সমস্ত ডেটা রিসেট করুন</h4>
+             <p class="text-xs text-red-600 mt-1">ওয়েবসাইটের বর্তমান সমস্ত তথ্য মুছে ডিফল্ট অবস্থায় ফিরে যাবে।</p>
+           </div>
+           <button class="btn btn-danger whitespace-nowrap w-full sm:w-auto shadow-lg" onclick="resetData()">🗑️ রিসেট করুন</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+};
+
+function changeFirebasePass(e){
+  e.preventDefault();
+  const p1 = document.getElementById('newPass1').value;
+  const p2 = document.getElementById('newPass2').value;
+  if(p1 !== p2) return toast('দুটি পাসওয়ার্ড মিলছে না। আবার চেষ্টা করুন।', 1);
+  
+  if(currentUser){
+    currentUser.updatePassword(p1).then(() => {
+      toast('সফলভাবে পাসওয়ার্ড পরিবর্তন করা হয়েছে।');
+      e.target.reset();
+    }).catch(error => {
+      if(error.code === 'auth/requires-recent-login'){
+        toast('নিরাপত্তার কারণে আপনাকে লগআউট করে আবার লগইন করতে হবে।', 1);
+        setTimeout(logout, 3000);
+      } else {
+        toast('ত্রুটি: ' + error.message, 1);
+      }
+    });
+  }
+}
+
+function exportData(){
+  const b=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(b);
+  a.download='hazariganj-school-backup-'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();
+}
+
+function importData(){
+  const i=document.createElement('input');
+  i.type='file';i.accept='.json';
+  i.onchange=e=>{
+    const r=new FileReader();
+    r.onload=()=>{
+      try{
+        const importedData = JSON.parse(r.result);
+        if(!importedData.settings) throw new Error("Invalid Data");
+        DB=importedData;
+        save();
+        toast('সফলভাবে ডেটা ইম্পোর্ট হয়েছে। পেজ রিলোড হচ্ছে...');
+        setTimeout(()=>location.reload(), 2000);
+      }catch(err){
+        toast('ইম্পোর্ট ব্যর্থ হয়েছে। সঠিক JSON ফাইল নির্বাচন করুন।',1);
+      }
+    };
+    r.readAsText(e.target.files[0]);
+  };
+  i.click();
+}
+
+function resetData(){
+  if(confirm('সতর্কতা: আপনি কি নিশ্চিত যে আপনি ওয়েবসাইটের সমস্ত বর্তমান তথ্য মুছে ফেলতে চান? এই অ্যাকশনটি ফেরানো সম্ভব নয়!')){
+    const confirmText = prompt('রিসেট নিশ্চিত করতে "RESET" টাইপ করুন:');
+    if(confirmText === 'RESET') {
+      database.ref('hgs_school_data').remove().then(() => {
+        alert('ডেটাবেস সফলভাবে রিসেট করা হয়েছে।');
+        location.reload();
+      });
+    } else {
+      toast('রিসেট বাতিল করা হয়েছে।', 1);
+    }
+  }
+}
+</script>
+</body>
+</html>
