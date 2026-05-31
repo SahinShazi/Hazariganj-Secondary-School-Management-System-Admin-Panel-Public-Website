@@ -16,7 +16,7 @@
 
 ## 📖 About The Project
 
-The **Hazariganj Secondary School Admin Panel** is a web-based administration dashboard built to digitize and streamline the school's day-to-day operations. It serves as the backend management interface for the [Hazariganj Secondary School](https://hazariganj.edu.bd) website.
+The **Hazariganj Secondary School Admin Panel** is a web-based administration dashboard built to digitize and streamline the school's day-to-day operations. It serves as the backend management interface for the [Hazariganj Secondary School](https://hazariganjschool.blogspot.com) website.
 
 Powered by Firebase's Realtime Database, administrators can manage students, teachers, notices, applications, and much more — all from a single, unified interface.
 
@@ -75,7 +75,7 @@ Update homepage sections, school information (EIIN, Code), top bar text, and ima
 ### Step 1 — Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/hazariganj-admin-panel.git
+git clone https://github.com/SahinShazi/Hazariganj-Secondary-School-Management-System-Admin-Panel-Public-Website.git
 cd hazariganj-admin-panel
 ```
 
@@ -105,17 +105,6 @@ const firebaseConfig = {
 ### Step 4 — Run the App
 
 Open `admin.html` directly in your browser, or use the **Live Server** extension in VS Code for a better development experience.
-
----
-
-## 🔑 Demo Login Credentials
-
-> ⚠️ **Warning:** These credentials are for demo purposes only. Change your password immediately before using this in production.
-
-| Field | Value |
-|---|---|
-| **Email** | `admin@hazariganj.edu.bd` |
-| **Password** | `admin12345` |
 
 ---
 
@@ -152,7 +141,7 @@ Contributions are always welcome!
 *Self-Taught Web Developer & UI/UX Enthusiast*
 *SSC Batch 2026, Hazariganj Secondary School*
 
-[![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/your-username)
+[![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/SahinShazi)
 
 </div>
 
